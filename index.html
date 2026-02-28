@@ -598,22 +598,33 @@
                 const customerName = order.name;
                 const phone = order.phone;
                 const service = order.service;
-
-                // simulate telegram bot API call (in real life you'd do fetch to your bot)
-                console.log(`📨 TELEGRAM BOT SIMULATION: SMS to ${phone} (${customerName}) — "Your ${service} laundry is READY for pickup. -Divine Touch"`);
-
-                // show visual toast with all details
-                const msg = `📲 SMS to ${phone}: Hi ${customerName}, ${service} ready. (Telegram bot)`;
-                showTelegramNotify(msg);
-
-                // OPTIONAL: you could uncomment to make a real call to telegram API if you have token
-                /*
-                const botToken = 'YOUR_BOT_TOKEN'; // you would replace with real token
-                const chatId = phone;  // but note: telegram requires chatId, not phone. Usually you need to map phone→chatId. This is just concept.
-                const text = encodeURIComponent(`Your ${service} laundry is READY for pickup. - Divine Touch Laundry`);
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${text}`)
-                    .catch(err => console.warn('telegram api error', err));
-                */
+            // Send to n8n webhook (Termii SMS)
+            fetch('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms', {  // Replace with your actual n8n webhook URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerName: customerName,
+                    phone: phone,
+                    service: service
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('SMS sent successfully:', data);
+                showTelegramNotify(`✅ SMS sent to ${phone}`);
+            })
+            .catch(error => {
+                console.error('Error sending SMS:', error);
+                showTelegramNotify(`❌ SMS failed: ${error.message}`);
+            });
+               
             } else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
                 // optional: if switched back to pending, no SMS
                 showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
