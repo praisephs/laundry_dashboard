@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Touch Laundry · Staff Dashboard</title>
+    <!-- Font Awesome for icons (professional touch) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .dashboard {
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        /* header with laundry name */
+        .brand-header {
+            background: white;
+            border-radius: 28px 28px 28px 28px;
+            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.08);
+            padding: 1.8rem 2.5rem;
+            margin-bottom: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            border: 1px solid #ffffff80;
+            backdrop-filter: blur(2px);
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand-title i {
+            font-size: 2.8rem;
+            color: #0b4f6c;
+            background: #e1ecf5;
+            padding: 12px;
+            border-radius: 50%;
+        }
+
+        .brand-title h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(145deg, #093044, #1b6b8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .telegram-badge {
+            background: #eef5fa;
+            border-radius: 60px;
+            padding: 0.7rem 1.5rem;
+            color: #1c6c8c;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            border: 1px solid #c7dde9;
+        }
+
+        .telegram-badge i {
+            font-size: 1.6rem;
+            color: #28a0d7;
+        }
+
+        /* main grid: left form + right table */
+        .grid-panel {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+        }
+
+        /* ----- form card (staff entry) ----- */
+        .form-card {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 35px -8px rgba(18, 52, 77, 0.12);
+            padding: 2rem 1.8rem;
+            height: fit-content;
+            border: 1px solid rgba(255,255,255,0.7);
+            backdrop-filter: blur(2px);
+        }
+
+        .form-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #113946;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-card h2 i {
+            color: #2e7a98;
+        }
+
+        .subh {
+            font-size: 0.9rem;
+            color: #5b7e94;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2e7a98;
+            padding-left: 1rem;
+            background: #f0f7fc;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 1.7rem;
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #1f4b63;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input-group label i {
+            width: 20px;
+            color: #2a6f8d;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 14px 18px;
+            background: #f2f9ff;
+            border: 2px solid #dae9f2;
+            border-radius: 24px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            color: #0b3447;
+            font-weight: 500;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #2f86ab;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(43, 128, 173, 0.15);
+        }
+
+        .input-group input::placeholder {
+            color: #8baac0;
+            font-weight: 400;
+        }
+
+        .btn-primary {
+            background: #145873;
+            border: none;
+            padding: 16px 22px;
+            border-radius: 40px;
+            width: 100%;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 10px 20px -7px #0a3f55;
+            border: 1px solid #4794b5;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #0c4762;
+            transform: scale(1.02);
+            box-shadow: 0 16px 22px -8px #0b4f6c;
+        }
+
+        .btn-primary i {
+            font-size: 1.2rem;
+        }
+
+        .info-note {
+            margin-top: 20px;
+            background: #eaf3fa;
+            border-radius: 20px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: #17536d;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .info-note i {
+            font-size: 1.8rem;
+            color: #4794b5;
+        }
+
+        /* ----- orders table (dashboard) ----- */
+        .table-panel {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 35px -8px rgba(18, 52, 77, 0.12);
+            padding: 1.8rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.7);
+            backdrop-filter: blur(2px);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .table-header h3 {
+            font-size: 1.5rem;
+            color: #0b3f55;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-pending, .badge-ready {
+            background: #fef7e6;
+            color: #aa7000;
+            font-weight: 600;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+
+        .badge-ready {
+            background: #e1f3ea;
+            color: #0c6743;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 0.5rem 0.8rem 0.5rem;
+            color: #366277;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid #c2dceb;
+        }
+
+        td {
+            padding: 1rem 0.5rem;
+            border-bottom: 1px solid #daecf5;
+            color: #174c64;
+            font-weight: 500;
+        }
+
+        .service-badge {
+            background: #dbeefb;
+            padding: 0.3rem 0.9rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0d4f6e;
+            display: inline-block;
+        }
+
+        .status-select {
+            background: #ecf5fa;
+            border: 2px solid #b9d5e7;
+            border-radius: 30px;
+            padding: 0.4rem 1rem;
+            font-weight: 500;
+            color: #0f445b;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .status-select.ready {
+            background: #d7f0e2;
+            border-color: #479e7a;
+            color: #0c553b;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #2780a8;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: 0.1s;
+            padding: 0 8px;
+        }
+
+        .action-btn:hover {
+            color: #063b51;
+            transform: scale(1.1);
+        }
+
+        .empty-row td {
+            padding: 3rem;
+            text-align: center;
+            color: #6f96ac;
+            font-style: italic;
+        }
+
+        .toast-message {
+            visibility: hidden;
+            min-width: 260px;
+            background: #145873;
+            color: #fff;
+            text-align: center;
+            border-radius: 60px;
+            padding: 14px 18px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 500;
+            box-shadow: 0 15px 30px -10px #0a3343;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .toast-message.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .toast-message i {
+            font-size: 1.5rem;
+        }
+
+        /* mobile */
+        @media (max-width: 950px) {
+            .grid-panel {
+                grid-template-columns: 1fr;
+            }
+            .brand-header {
+                flex-direction: column;
+                align-items: start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <!-- Divine Touch Laundry header (exactly as requested) -->
+    <div class="brand-header">
+        <div class="brand-title">
+            <i class="fas fa-hand-sparkles"></i>
+            <h1>Divine Touch Laundry</h1>
+        </div>
+        <div class="telegram-badge">
+            <i class="fab fa-telegram-plane"></i>
+            <span>Telegram SMS · bot active</span>
+        </div>
+    </div>
+
+    <!-- main staff area: entry form + order dashboard -->
+    <div class="grid-panel">
+        <!-- left: staff entry form -->
+        <div class="form-card">
+            <h2><i class="fas fa-tshirt"></i> New order</h2>
+            <div class="subh">Drop‑off registration · staff only</div>
+
+            <form id="orderForm">
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Full name</label>
+                    <input type="text" id="customerName" placeholder="e.g. Sarah Mwangi" required>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-phone-alt"></i> Phone number</label>
+                    <input type="tel" id="customerPhone" placeholder="07XX XXX XXX" required>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-broom"></i> Service</label>
+                    <select id="serviceType" required>
+                        <option value="" disabled selected>– select service –</option>
+                        <option value="Ironing">Ironing</option>
+                        <option value="Washing">Washing</option>
+                        <option value="Ironing and Washing">Ironing and Washing</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-plus-circle"></i> Add order (pending)
+                </button>
+            </form>
+
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i>
+                <span>After adding, update status to <strong>Ready</strong> below – client gets SMS via Telegram immediately.</span>
+            </div>
+        </div>
+
+        <!-- right: orders dashboard -->
+        <div class="table-panel">
+            <div class="table-header">
+                <h3><i class="fas fa-clipboard-list"></i> Current orders</h3>
+                <span class="badge-pending" id="pendingCount">Pending: 0</span>
+            </div>
+
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- dynamic rows will appear here -->
+                    <tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- fixed toast for SMS simulation -->
+<div id="telegramToast" class="toast-message">
+    <i class="fab fa-telegram-plane"></i> <span id="toastText">SMS sent via Telegram</span>
+</div>
+
+<script>
+    (function() {
+        // ---------- STORAGE ----------
+        let orders = [];   // each order: { id, name, phone, service, status }
+
+        // ---------- DOM elements ----------
+        const form = document.getElementById('orderForm');
+        const nameInp = document.getElementById('customerName');
+        const phoneInp = document.getElementById('customerPhone');
+        const serviceInp = document.getElementById('serviceType');
+        const tbody = document.getElementById('tableBody');
+        const pendingSpan = document.getElementById('pendingCount');
+        const toastEl = document.getElementById('telegramToast');
+        const toastText = document.getElementById('toastText');
+
+        // helper: show toast with custom message (simulate SMS via telegram)
+        function showTelegramNotify(msg) {
+            toastText.innerText = msg;
+            toastEl.classList.add('show');
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3200);
+        }
+
+        // update table and pending counter
+        function renderOrders() {
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>`;
+                pendingSpan.innerText = 'Pending: 0';
+                return;
+            }
+
+            let html = '';
+            let pendingCount = 0;
+
+            // sort by newest first (by id descending, but it's fine)
+            orders.forEach(order => {
+                if (order.status === 'Pending') pendingCount++;
+
+                const statusClass = order.status === 'Ready' ? 'ready' : '';
+                const serviceBadge = `<span class="service-badge">${order.service}</span>`;
+
+                html += `<tr data-id="${order.id}">
+                    <td><i class="fas fa-user-circle" style="color:#30758e; margin-right:6px;"></i>${escapeHtml(order.name)}</td>
+                    <td>${escapeHtml(order.phone)}</td>
+                    <td>${serviceBadge}</td>
+                    <td>
+                        <select class="status-select ${statusClass}" onchange="updateStatus('${order.id}', this.value)">
+                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                            <option value="Ready" ${order.status === 'Ready' ? 'selected' : ''}>✅ Ready</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="action-btn" onclick="deleteOrder('${order.id}')" title="delete order"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+            pendingSpan.innerText = `Pending: ${pendingCount}`;
+        }
+
+        // simple escape for XSS (just to be safe)
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;';
+                if(m === '"') return '&quot;'; return '&#039;';
+            });
+        }
+
+        // generate short unique id (timestamp + random)
+        function generateId() {
+            return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+        }
+
+        // ---------- ADD ORDER (staff submits) ----------
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = nameInp.value.trim();
+            const phone = phoneInp.value.trim();
+            const service = serviceInp.value;
+
+            if (!name || !phone || !service) {
+                showTelegramNotify('❌ Please fill all fields');
+                return;
+            }
+
+            // create new order (default status Pending)
+            const newOrder = {
+                id: generateId(),
+                name: name,
+                phone: phone,
+                service: service,
+                status: 'Pending'
+            };
+
+            orders.push(newOrder);
+            renderOrders();
+
+            // reset form
+            nameInp.value = '';
+            phoneInp.value = '';
+            serviceInp.value = '';
+
+            // confirmation toast (just staff info, no SMS to customer yet)
+            showTelegramNotify(`📥 Order added for ${name}`);
+        });
+
+        // ---------- UPDATE STATUS (AND SEND SMS VIA TELEGRAM IF READY) ----------
+        window.updateStatus = function(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const oldStatus = order.status;
+            order.status = newStatus;
+            renderOrders();
+
+            // if status changed TO "Ready" → send SMS alert (telegram simulation)
+            if (newStatus === 'Ready' && oldStatus !== 'Ready') {
+                const customerName = order.name;
+                const phone = order.phone;
+                const service = order.service;
+
+                // simulate telegram bot API call (in real life you'd do fetch to your bot)
+                console.log(`📨 TELEGRAM BOT SIMULATION: SMS to ${phone} (${customerName}) — "Your ${service} laundry is READY for pickup. -Divine Touch"`);
+
+                // show visual toast with all details
+                const msg = `📲 SMS to ${phone}: Hi ${customerName}, ${service} ready. (Telegram bot)`;
+                showTelegramNotify(msg);
+
+                // OPTIONAL: you could uncomment to make a real call to telegram API if you have token
+                /*
+                const botToken = 'YOUR_BOT_TOKEN'; // you would replace with real token
+                const chatId = phone;  // but note: telegram requires chatId, not phone. Usually you need to map phone→chatId. This is just concept.
+                const text = encodeURIComponent(`Your ${service} laundry is READY for pickup. - Divine Touch Laundry`);
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${text}`)
+                    .catch(err => console.warn('telegram api error', err));
+                */
+            } else if (newStatus === 'Pending' && oldStatus === 'Ready') {
+                // optional: if switched back to pending, no SMS
+                showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
+            } else {
+                // just normal update (no ready)
+                showTelegramNotify(`Status updated to ${newStatus}`);
+            }
+        };
+
+        // ---------- DELETE ORDER ----------
+        window.deleteOrder = function(orderId) {
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex === -1) return;
+
+            const deleted = orders[orderIndex];
+            orders.splice(orderIndex, 1);
+            renderOrders();
+            showTelegramNotify(`🗑️ Order for ${deleted.name} removed`);
+        };
+
+        // ---------- make functions global for onclick handlers ----------
+        window.updateStatus = updateStatus;
+        window.deleteOrder = deleteOrder;
+
+        // ---------- demo: prepopulate with two example orders (so dashboard isn't empty) ----------
+        (function addExamples() {
+            orders.push({
+                id: generateId(),
+                name: 'Margaret Akinyi',
+                phone: '0722 123456',
+                service: 'Ironing and Washing',
+                status: 'Pending'
+            });
+            orders.push({
+                id: generateId(),
+                name: 'James Kariuki',
+                phone: '0733 987654',
+                service: 'Washing',
+                status: 'Ready'    // one ready to show both states
+            });
+            renderOrders();
+        })();
+
+    })();
+</script>
+
+<!-- small note: the telegram badge and toasts are fully interactive -->
+</body>
+</html>
