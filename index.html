@@ -408,8 +408,19 @@
                 </div>
 
                 <div class="input-group">
-                    <label><i class="fas fa-phone-alt"></i> Phone number</label>
-                    <input type="tel" id="customerPhone" placeholder="07XX XXX XXX" required>
+                 
+                     <label><i class="fas fa-phone-alt"></i> Phone number (11 digits)</label>
+                    <input type="tel" 
+                           id="customerPhone" 
+                           placeholder="0712345678" 
+                           pattern="[0-9]{11}" 
+                           maxlength="11" 
+                           minlength="11"
+                           title="Please enter exactly 11 digits (numbers only)"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           required>
+                    <small style="color: #666; display: block; margin-top: 5px; margin-left: 10px;">Enter 11 digits only</small>
+                    
                 </div>
 
                 <div class="input-group">
