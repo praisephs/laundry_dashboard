@@ -603,7 +603,7 @@
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${text}`)
                     .catch(err => console.warn('telegram api error', err));
                 */
-            } else if (newStatus === 'Pending' && oldStatus === 'Ready') {
+            } else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
                 // optional: if switched back to pending, no SMS
                 showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
             } else {
