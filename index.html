@@ -601,70 +601,70 @@
 
 
                // CORRECT corsproxy.io implementation
-const CORS_PROXY = 'https://corsproxy.io/?';
-const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
+// const CORS_PROXY = 'https://corsproxy.io/?';
+// const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
 
-                fetch(CORS_PROXY + N8N_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        customerName: name,
-                        phone: phone,
-                        service: service
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                    showTelegramNotify(`✅ SMS sent to ${phone}`);
-                })
-                .catch(error => {
-                    console.error('Error sending SMS:', error);
-                    showTelegramNotify(`❌ SMS failed: ${error.message}`);
-                });     
+//                 fetch(CORS_PROXY + N8N_URL, {
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                     },
+//                     body: JSON.stringify({
+//                         customerName: name,
+//                         phone: phone,
+//                         service: service
+//                     })
+//                 })
+//                 .then(response => {
+//                     if (!response.ok) {
+//                         throw new Error(`HTTP error! status: ${response.status}`);
+//                     }
+//                     return response.json();
+//                 })
+//                 .then(data => {
+//                     console.log('Success:', data);
+//                     showTelegramNotify(`✅ SMS sent to ${phone}`);
+//                 })
+//                 .catch(error => {
+//                     console.error('Error sending SMS:', error);
+//                     showTelegramNotify(`❌ SMS failed: ${error.message}`);
+//                 });     
                 
-        //     // Send to n8n webhook (Termii SMS)
-        //     fetch('https://praisephs2000.app.n8n.cloud/webhook-test/laundry-sms', {  // Replace with your actual n8n webhook URL
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             customerName: customerName,
-        //             phone: phone,
-        //             service: service
-        //         })
-        //     })
-        //     .then(response => {
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! status: ${response.status}`);
-        //         }
-        //         return response.json();
-        //     })
-        //     .then(data => {
-        //         console.log('SMS sent successfully:', data);
-        //         showTelegramNotify(`✅ SMS sent to ${phone}`);
-        //     })
-        //     .catch(error => {
-        //         console.error('Error sending SMS:', error);
-        //         showTelegramNotify(`❌ SMS failed: ${error.message}`);
-        //     });
+            // Send to n8n webhook (Termii SMS)
+            fetch('https://praisephs2000.app.n8n.cloud/webhook-test/laundry-sms', {  // Replace with your actual n8n webhook URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerName: customerName,
+                    phone: phone,
+                    service: service
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('SMS sent successfully:', data);
+                showTelegramNotify(`✅ SMS sent to ${phone}`);
+            })
+            .catch(error => {
+                console.error('Error sending SMS:', error);
+                showTelegramNotify(`❌ SMS failed: ${error.message}`);
+            });
                
-        //     } else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
-        //         // optional: if switched back to pending, no SMS
-        //         showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
-        //     } else {
-        //         // just normal update (no ready)
-        //         showTelegramNotify(`Status updated to ${newStatus}`);
-        //     }
-        // };
+            } else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
+                // optional: if switched back to pending, no SMS
+                showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
+            } else {
+                // just normal update (no ready)
+                showTelegramNotify(`Status updated to ${newStatus}`);
+            }
+        };
 
         // ---------- DELETE ORDER ----------
         window.deleteOrder = function(orderId) {
