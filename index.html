@@ -584,20 +584,20 @@
             showTelegramNotify(`📥 Order added for ${name}`);
         });
 
-        // ---------- UPDATE STATUS (AND SEND SMS VIA TELEGRAM IF READY) ----------
-        window.updateStatus = function(orderId, newStatus) {
-            const order = orders.find(o => o.id === orderId);
-            if (!order) return;
+        // // ---------- UPDATE STATUS (AND SEND SMS VIA TELEGRAM IF READY) ----------
+        // window.updateStatus = function(orderId, newStatus) {
+        //     const order = orders.find(o => o.id === orderId);
+        //     if (!order) return;
 
-            const oldStatus = order.status;
-            order.status = newStatus;
-            renderOrders();
+        //     const oldStatus = order.status;
+        //     order.status = newStatus;
+        //     renderOrders();
 
-            // if status changed TO "Ready" → send SMS alert (telegram simulation)
-            if (newStatus === 'Ready' && oldStatus !== 'Ready') {
-                const customerName = order.name;
-                const phone = order.phone;
-                const service = order.service;
+        //     // if status changed TO "Ready" → send SMS alert (telegram simulation)
+        //     if (newStatus === 'Ready' && oldStatus !== 'Ready') {
+        //         const customerName = order.name;
+        //         const phone = order.phone;
+        //         const service = order.service;
 
 
                // CORRECT corsproxy.io implementation
