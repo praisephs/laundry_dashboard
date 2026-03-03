@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Touch Laundry · Staff Dashboard</title>f
+    <title>Divine Touch Laundry · Staff Dashboard</title>
     <!-- Font Awesome for icons (professional touch) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -382,7 +382,7 @@
 <body>
 
 <div class="dashboard">
-    <!-- Divine Touch Laundry header (exactly as requested) -->
+    <!-- Divine Touch Laundry header -->
     <div class="brand-header">
         <div class="brand-title">
             <i class="fas fa-hand-sparkles"></i>
@@ -390,7 +390,7 @@
         </div>
         <div class="telegram-badge">
             <i class="fab fa-telegram-plane"></i>
-            <span>Telegram SMS · bot active</span>
+            <span>SMS Notifications · Active</span>
         </div>
     </div>
 
@@ -408,8 +408,7 @@
                 </div>
 
                 <div class="input-group">
-                 
-                     <label><i class="fas fa-phone-alt"></i> Phone number (11 digits)</label>
+                    <label><i class="fas fa-phone-alt"></i> Phone number (11 digits)</label>
                     <input type="tel" 
                            id="customerPhone" 
                            placeholder="0712345678" 
@@ -420,7 +419,6 @@
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            required>
                     <small style="color: #666; display: block; margin-top: 5px; margin-left: 10px;">Enter 11 digits only</small>
-                    
                 </div>
 
                 <div class="input-group">
@@ -440,7 +438,7 @@
 
             <div class="info-note">
                 <i class="fas fa-info-circle"></i>
-                <span>After adding, update status to <strong>Ready</strong> below – client gets SMS via Telegram immediately.</span>
+                <span>After adding, update status to <strong>Ready</strong> below – client gets SMS immediately.</span>
             </div>
         </div>
 
@@ -470,15 +468,15 @@
     </div>
 </div>
 
-<!-- fixed toast for SMS simulation -->
+<!-- fixed toast for SMS notification -->
 <div id="telegramToast" class="toast-message">
-    <i class="fab fa-telegram-plane"></i> <span id="toastText">SMS sent via Telegram</span>
+    <i class="fab fa-telegram-plane"></i> <span id="toastText">SMS sent</span>
 </div>
 
 <script>
     (function() {
         // ---------- STORAGE ----------
-        let orders = [];   // each order: { id, name, phone, service, status }
+        let orders = [];
 
         // ---------- DOM elements ----------
         const form = document.getElementById('orderForm');
@@ -490,7 +488,7 @@
         const toastEl = document.getElementById('telegramToast');
         const toastText = document.getElementById('toastText');
 
-        // helper: show toast with custom message (simulate SMS via telegram)
+        // Helper: show toast message
         function showTelegramNotify(msg) {
             toastText.innerText = msg;
             toastEl.classList.add('show');
@@ -499,7 +497,23 @@
             }, 3200);
         }
 
-        // update table and pending counter
+        // Escape HTML for security
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                if(m === '"') return '&quot;';
+                return '&#039;';
+            });
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+        }
+
+        // Render orders table
         function renderOrders() {
             if (orders.length === 0) {
                 tbody.innerHTML = `<tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>`;
@@ -510,7 +524,6 @@
             let html = '';
             let pendingCount = 0;
 
-            // sort by newest first (by id descending, but it's fine)
             orders.forEach(order => {
                 if (order.status === 'Pending') pendingCount++;
 
@@ -522,13 +535,13 @@
                     <td>${escapeHtml(order.phone)}</td>
                     <td>${serviceBadge}</td>
                     <td>
-                        <select class="status-select ${statusClass}" onchange="updateStatus('${order.id}', this.value)">
+                        <select class="status-select ${statusClass}" onchange="window.updateStatus('${order.id}', this.value)">
                             <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
                             <option value="Ready" ${order.status === 'Ready' ? 'selected' : ''}>✅ Ready</option>
                         </select>
                     </td>
                     <td>
-                        <button class="action-btn" onclick="deleteOrder('${order.id}')" title="delete order"><i class="fas fa-trash-alt"></i></button>
+                        <button class="action-btn" onclick="window.deleteOrder('${order.id}')" title="delete order"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>`;
             });
@@ -537,20 +550,7 @@
             pendingSpan.innerText = `Pending: ${pendingCount}`;
         }
 
-        // simple escape for XSS (just to be safe)
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/[&<>"']/g, function(m) {
-                if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;';
-                if(m === '"') return '&quot;'; return '&#039;';
-            });
-        }
-
-        // generate short unique id (timestamp + random)
-        function generateId() {
-            return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
-        }
-
-        // ---------- ADD ORDER (staff submits) ------------
+        // ---------- ADD ORDER ----------
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -563,7 +563,6 @@
                 return;
             }
 
-            // create new order (default status Pending)
             const newOrder = {
                 id: generateId(),
                 name: name,
@@ -575,125 +574,66 @@
             orders.push(newOrder);
             renderOrders();
 
-            // reset form
+            // Reset form
             nameInp.value = '';
             phoneInp.value = '';
             serviceInp.value = '';
 
-            // confirmation toast (just staff info, no SMS to customer yet)
             showTelegramNotify(`📥 Order added for ${name}`);
         });
 
-        // // ---------- UPDATE STATUS (AND SEND SMS VIA TELEGRAM IF READY) ----------
-        // window.updateStatus = function(orderId, newStatus) {
-        //     const order = orders.find(o => o.id === orderId);
-        //     if (!order) return;
+        // ---------- UPDATE STATUS (AND SEND SMS WHEN READY) ----------
+        window.updateStatus = function(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
 
-        //     const oldStatus = order.status;
-        //     order.status = newStatus;
-        //     renderOrders();
+            const oldStatus = order.status;
+            order.status = newStatus;
+            renderOrders();
 
-        //     // if status changed TO "Ready" → send SMS alert (telegram simulation)
-        //     if (newStatus === 'Ready' && oldStatus !== 'Ready') {
-        //         const customerName = order.name;
-        //         const phone = order.phone;
-        //         const service = order.service;
+            // If status changed to "Ready", send SMS
+            if (newStatus === 'Ready' && oldStatus !== 'Ready') {
+                const customerName = order.name;
+                const phone = order.phone;
+                const service = order.service;
 
+                // Show sending notification
+                showTelegramNotify(`📤 Sending SMS to ${phone}...`);
 
-               // CORRECT corsproxy.io implementation
-// const CORS_PROXY = 'https://corsproxy.io/?';
-// const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
+                // Use CORS proxy to avoid CORS issues
+                const CORS_PROXY = 'https://corsproxy.io/?';
+                const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
 
-//                 fetch(CORS_PROXY + N8N_URL, {
-//                     method: 'POST',
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                     },
-//                     body: JSON.stringify({
-//                         customerName: name,
-//                         phone: phone,
-//                         service: service
-//                     })
-//                 })
-//                 .then(response => {
-//                     if (!response.ok) {
-//                         throw new Error(`HTTP error! status: ${response.status}`);
-//                     }
-//                     return response.json();
-//                 })
-//                 .then(data => {
-//                     console.log('Success:', data);
-//                     showTelegramNotify(`✅ SMS sent to ${phone}`);
-//                 })
-//                 .catch(error => {
-//                     console.error('Error sending SMS:', error);
-//                     showTelegramNotify(`❌ SMS failed: ${error.message}`);
-//                 });   
-
-            
-                //                // Alternative proxy: allorigins.win
-                // const PROXY = 'https://api.allorigins.win/raw?url=';
-                // const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook//laundry-sms');
-                
-                // fetch(PROXY + N8N_URL, {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({
-                //         customerName : name,
-                //         phone: phone,
-                //         service: service
-                //     })
-                // })
-                // .then(response => {
-                //     if (!response.ok) {
-                //         throw new Error(`HTTP error! status: ${response.status}`);
-                //     }
-                //     return response.json();
-                // })
-                // .then(data => {
-                //     console.log('Success:', data);
-                //     showTelegramNotify(`✅ SMS sent to ${phone}`);
-                // })
-                // .catch(error => {
-                //     console.error('Error sending SMS:', error);
-                //     showTelegramNotify(`❌ SMS failed: ${error.message}`);
-                // });
-                            
-                
-            // Send to n8n webhook (Termii SMS)
-            fetch('https://praisephs2000.app.n8n.cloud/webhook-test/laundry-sms', {  // Replace with your actual n8n webhook URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    customerName: customerName,
-                    phone: phone,
-                    service: service
+                fetch(CORS_PROXY + N8N_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerName: customerName,
+                        phone: phone,
+                        service: service
+                    })
                 })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('SMS sent successfully:', data);
-                showTelegramNotify(`✅ SMS sent to ${phone}`);
-            })
-            .catch(error => {
-                console.error('Error sending SMS:', error);
-                showTelegramNotify(`❌ SMS failed: ${error.message}`);
-            });
-               
-            } else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
-                // optional: if switched back to pending, no SMS
-                showTelegramNotify(`⚠️ Order #${orderId.substr(-4)} set back to pending`);
-            } else {
-                // just normal update (no ready)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    showTelegramNotify(`✅ SMS sent to ${phone}`);
+                })
+                .catch(error => {
+                    console.error('Error sending SMS:', error);
+                    showTelegramNotify(`❌ SMS failed: ${error.message}`);
+                });
+            } 
+            else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
+                showTelegramNotify(`⚠️ Order set back to pending`);
+            } 
+            else {
                 showTelegramNotify(`Status updated to ${newStatus}`);
             }
         };
@@ -709,25 +649,21 @@
             showTelegramNotify(`🗑️ Order for ${deleted.name} removed`);
         };
 
-        // ---------- make functions global for onclick handlers ----------
-        window.updateStatus = updateStatus;
-        window.deleteOrder = deleteOrder;
-
-        // ---------- demo: prepopulate with two example orders (so dashboard isn't empty) ----------
+        // ---------- Initialize with sample orders ----------
         (function addExamples() {
             orders.push({
                 id: generateId(),
                 name: 'Margaret Akinyi',
-                phone: '0722 123456',
+                phone: '0722123456',
                 service: 'Ironing and Washing',
                 status: 'Pending'
             });
             orders.push({
                 id: generateId(),
                 name: 'James Kariuki',
-                phone: '0733 987654',
+                phone: '0733987654',
                 service: 'Washing',
-                status: 'Ready'    // one ready to show both states
+                status: 'Ready'
             });
             renderOrders();
         })();
@@ -735,6 +671,5 @@
     })();
 </script>
 
-<!-- small note: the telegram badge and toasts are fully interactive -->
 </body>
 </html>
