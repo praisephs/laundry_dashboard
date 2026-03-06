@@ -5,12 +5,9 @@
             // ============================================
             // CONFIGURATION
             // ============================================
-            const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbxDpDaSHK9_esxozLfbJXB18M6huck4vqW7NMOvuVfPPhaTbrQRmLPIUGcCtMcIhEBh/exec'; // ← PASTE YOUR URL HERE
+            const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbxDpDaSHK9_esxozLfbJXB18M6huck4vqW7NMOvuVfPPhaTbrQRmLPIUGcCtMcIhEBh/exec';
             
-            // ---------- STORAGE ----------
-            let orders = [];
-
-            // ---------- DOM elements ----------
+            // ---------- SAFELY GET DOM ELEMENTS ----------
             const form = document.getElementById('orderForm');
             const nameInp = document.getElementById('customerName');
             const phoneInp = document.getElementById('customerPhone');
@@ -20,8 +17,28 @@
             const toastEl = document.getElementById('telegramToast');
             const toastText = document.getElementById('toastText');
 
+            // 🔍 CHECK IF CRITICAL ELEMENTS EXIST
+            if (!form) {
+                console.error('CRITICAL ERROR: Form element not found! Check that id="orderForm" exists in your HTML.');
+                showTelegramNotify('❌ System error: Form not found');
+                return; // Stop execution if form is missing
+            }
+
+            if (!nameInp || !phoneInp || !serviceInp) {
+                console.error('CRITICAL ERROR: Form input elements not found!');
+                showTelegramNotify('❌ System error: Input fields not found');
+                return;
+            }
+
+            // ---------- STORAGE ----------
+            let orders = [];
+
             // Helper: show toast message
             function showTelegramNotify(msg) {
+                if (!toastEl || !toastText) {
+                    console.log('Toast not ready:', msg);
+                    return;
+                }
                 toastText.innerText = msg;
                 toastEl.classList.add('show');
                 setTimeout(() => {
@@ -42,6 +59,8 @@
 
             // Render orders table
             function renderOrders() {
+                if (!tbody || !pendingSpan) return;
+                
                 if (orders.length === 0) {
                     tbody.innerHTML = `<tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>`;
                     pendingSpan.innerText = 'Pending: 0';
@@ -173,11 +192,9 @@
                     return;
                 }
 
-                // Show loading
                 showTelegramNotify('📤 Saving order...');
 
                 try {
-                    // Save to Google Sheets first
                     const result = await saveOrderToDatabase({
                         name: name,
                         phone: phone,
@@ -185,7 +202,6 @@
                         status: 'Pending'
                     });
 
-                    // Add to local array with the ID from Google Sheets
                     orders.push({
                         id: result.orderId,
                         name: name,
@@ -196,7 +212,6 @@
 
                     renderOrders();
 
-                    // Reset form
                     nameInp.value = '';
                     phoneInp.value = '';
                     serviceInp.value = '';
@@ -216,16 +231,13 @@
 
                 const oldStatus = order.status;
 
-                // Update locally immediately (optimistic update)
                 order.status = newStatus;
                 renderOrders();
                 showTelegramNotify(`📤 Updating status...`);
 
                 try {
-                    // Update in Google Sheets
                     await updateOrderStatusInDatabase(orderId, newStatus);
                     
-                    // If status changed to "Ready", send SMS
                     if (newStatus === 'Ready' && oldStatus !== 'Ready') {
                         await sendSMSNotification(order);
                     } else {
@@ -233,7 +245,6 @@
                     }
                     
                 } catch (error) {
-                    // Revert on error
                     order.status = oldStatus;
                     renderOrders();
                     console.error('Error updating status:', error);
@@ -247,7 +258,6 @@
                 const phone = order.phone;
                 const service = order.service;
 
-                // Your existing SMS sending code (using n8n)
                 const CORS_PROXY = 'https://corsproxy.io/?';
                 const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
 
@@ -274,13 +284,10 @@
 
             // ---------- DELETE ORDER ----------
             window.deleteOrder = function(orderId) {
-                // Note: Delete functionality requires additional Google Sheets API endpoint
-                // For now, just show message
                 showTelegramNotify('❌ Delete requires database sync');
             };
 
             // ---------- INITIALIZE ----------
-            // Load orders from Google Sheets when page starts
             loadOrdersFromDatabase();
 
         })();
