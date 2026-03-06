@@ -479,10 +479,13 @@
     // Wait for the HTML to fully load before running
     document.addEventListener('DOMContentLoaded', function() {
         (function() {
+                        // Add this line before GOOGLE_SHEETS_API
+            const CORS_PROXY = 'https://corsproxy.io/?';
+            const GOOGLE_SHEETS_API = CORS_PROXY + 'https://script.google.com/macros/s/AKfycbxDpDaSHK9_esxozLfbJXB18M6huck4vqW7NMOvuVfPPhaTbrQRmLPIUGcCtMcIhEBh/exec';
             // ============================================
             // CONFIGURATION
             // ============================================
-            const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbx3ndsRh_UyNFO6_7jIyHWGBMiO6qgw_j8ncgHKR7rBYDJWhNjWdZApUof8q2V6ceaI/exec';
+            const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbypCokBhlwAciusyliIfWQ7PV2T10Azlw0M6RfH7Lm2kbDFEN56RgzF3jtW7nxF7NI/exec';
             
             // ---------- SAFELY GET DOM ELEMENTS ----------
             const form = document.getElementById('orderForm');
@@ -610,6 +613,7 @@
             async function saveOrderToDatabase(order) {
                 const response = await fetch(GOOGLE_SHEETS_API, {
                     method: 'POST',
+                    mode: 'no-cors',
                //     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         customerName: order.name,
