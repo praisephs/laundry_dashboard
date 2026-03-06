@@ -1,481 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Touch Laundry · Staff Dashboard</title>
-    <!-- Font Awesome for icons (professional touch) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background: #f4f7fb;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1.5rem;
-        }
-
-        .dashboard {
-            max-width: 1300px;
-            width: 100%;
-        }
-
-        /* header with laundry name */
-        .brand-header {
-            background: white;
-            border-radius: 28px 28px 28px 28px;
-            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.08);
-            padding: 1.8rem 2.5rem;
-            margin-bottom: 2.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            border: 1px solid #ffffff80;
-            backdrop-filter: blur(2px);
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
-        .brand-title i {
-            font-size: 2.8rem;
-            color: #0b4f6c;
-            background: #e1ecf5;
-            padding: 12px;
-            border-radius: 50%;
-        }
-
-        .brand-title h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            background: linear-gradient(145deg, #093044, #1b6b8a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .telegram-badge {
-            background: #eef5fa;
-            border-radius: 60px;
-            padding: 0.7rem 1.5rem;
-            color: #1c6c8c;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1rem;
-            border: 1px solid #c7dde9;
-        }
-
-        .telegram-badge i {
-            font-size: 1.6rem;
-            color: #28a0d7;
-        }
-
-        /* main grid: left form + right table */
-        .grid-panel {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 2rem;
-        }
-
-        /* ----- form card (staff entry) ----- */
-        .form-card {
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 20px 35px -8px rgba(18, 52, 77, 0.12);
-            padding: 2rem 1.8rem;
-            height: fit-content;
-            border: 1px solid rgba(255,255,255,0.7);
-            backdrop-filter: blur(2px);
-        }
-
-        .form-card h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #113946;
-            margin-bottom: 0.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-card h2 i {
-            color: #2e7a98;
-        }
-
-        .subh {
-            font-size: 0.9rem;
-            color: #5b7e94;
-            margin-bottom: 2rem;
-            border-left: 4px solid #2e7a98;
-            padding-left: 1rem;
-            background: #f0f7fc;
-            border-radius: 0 12px 12px 0;
-            line-height: 1.4;
-        }
-
-        .input-group {
-            margin-bottom: 1.7rem;
-        }
-
-        .input-group label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: #1f4b63;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .input-group label i {
-            width: 20px;
-            color: #2a6f8d;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 14px 18px;
-            background: #f2f9ff;
-            border: 2px solid #dae9f2;
-            border-radius: 24px;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.2s;
-            color: #0b3447;
-            font-weight: 500;
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            border-color: #2f86ab;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(43, 128, 173, 0.15);
-        }
-
-        .input-group input::placeholder {
-            color: #8baac0;
-            font-weight: 400;
-        }
-
-        .btn-primary {
-            background: #145873;
-            border: none;
-            padding: 16px 22px;
-            border-radius: 40px;
-            width: 100%;
-            font-weight: 600;
-            font-size: 1.2rem;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: 0.15s;
-            box-shadow: 0 10px 20px -7px #0a3f55;
-            border: 1px solid #4794b5;
-            margin-top: 8px;
-        }
-
-        .btn-primary:hover {
-            background: #0c4762;
-            transform: scale(1.02);
-            box-shadow: 0 16px 22px -8px #0b4f6c;
-        }
-
-        .btn-primary i {
-            font-size: 1.2rem;
-        }
-
-        .info-note {
-            margin-top: 20px;
-            background: #eaf3fa;
-            border-radius: 20px;
-            padding: 1rem;
-            font-size: 0.9rem;
-            color: #17536d;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .info-note i {
-            font-size: 1.8rem;
-            color: #4794b5;
-        }
-
-        /* ----- orders table (dashboard) ----- */
-        .table-panel {
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 20px 35px -8px rgba(18, 52, 77, 0.12);
-            padding: 1.8rem 1.5rem;
-            border: 1px solid rgba(255,255,255,0.7);
-            backdrop-filter: blur(2px);
-            overflow-x: auto;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-
-        .table-header h3 {
-            font-size: 1.5rem;
-            color: #0b3f55;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .badge-pending, .badge-ready {
-            background: #fef7e6;
-            color: #aa7000;
-            font-weight: 600;
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-            font-size: 0.8rem;
-        }
-
-        .badge-ready {
-            background: #e1f3ea;
-            color: #0c6743;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem 0.5rem 0.8rem 0.5rem;
-            color: #366277;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-bottom: 2px solid #c2dceb;
-        }
-
-        td {
-            padding: 1rem 0.5rem;
-            border-bottom: 1px solid #daecf5;
-            color: #174c64;
-            font-weight: 500;
-        }
-
-        .service-badge {
-            background: #dbeefb;
-            padding: 0.3rem 0.9rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #0d4f6e;
-            display: inline-block;
-        }
-
-        .status-select {
-            background: #ecf5fa;
-            border: 2px solid #b9d5e7;
-            border-radius: 30px;
-            padding: 0.4rem 1rem;
-            font-weight: 500;
-            color: #0f445b;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .status-select.ready {
-            background: #d7f0e2;
-            border-color: #479e7a;
-            color: #0c553b;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: #2780a8;
-            font-size: 1.3rem;
-            cursor: pointer;
-            transition: 0.1s;
-            padding: 0 8px;
-        }
-
-        .action-btn:hover {
-            color: #063b51;
-            transform: scale(1.1);
-        }
-
-        .empty-row td {
-            padding: 3rem;
-            text-align: center;
-            color: #6f96ac;
-            font-style: italic;
-        }
-
-        .toast-message {
-            visibility: hidden;
-            min-width: 260px;
-            background: #145873;
-            color: #fff;
-            text-align: center;
-            border-radius: 60px;
-            padding: 14px 18px;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 500;
-            box-shadow: 0 15px 30px -10px #0a3343;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s, visibility 0.2s;
-        }
-
-        .toast-message.show {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .toast-message i {
-            font-size: 1.5rem;
-        }
-
-        /* mobile */
-        @media (max-width: 950px) {
-            .grid-panel {
-                grid-template-columns: 1fr;
-            }
-            .brand-header {
-                flex-direction: column;
-                align-items: start;
-                gap: 15px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<div class="dashboard">
-    <!-- Divine Touch Laundry header -->
-    <div class="brand-header">
-        <div class="brand-title">
-            <!-- <i class="fas fa-hand-sparkles"></i> -->
-            <img src="file.jpg" alt="Divine Touch Laundry Logo" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #e1ecf5; padding: 5px;">
-            <h1>Divine Touch Laundry</h1>
-        </div>
-        <div class="telegram-badge">
-            <i class="fab fa-telegram-plane"></i>
-            <span>SMS Notifications · Active</span>
-        </div>
-    </div>
-
-    <!-- main staff area: entry form + order dashboard -->
-    <div class="grid-panel">
-        <!-- left: staff entry form -->
-        <div class="form-card">
-            <h2><i class="fas fa-tshirt"></i> New order</h2>
-            <div class="subh">Drop‑off registration · staff only</div>
-
-            <form id="orderForm">
-                <div class="input-group">
-                    <label><i class="fas fa-user"></i> Full name</label>
-                    <input type="text" id="customerName" placeholder="e.g. Sarah Mwangi" required>
-                </div>
-
-                <div class="input-group">
-                    <label><i class="fas fa-phone-alt"></i> Phone number (11 digits)</label>
-                    <input type="tel" 
-                           id="customerPhone" 
-                           placeholder="0712345678" 
-                           pattern="[0-9]{11}" 
-                           maxlength="11" 
-                           minlength="11"
-                           title="Please enter exactly 11 digits (numbers only)"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                           required>
-                    <small style="color: #666; display: block; margin-top: 5px; margin-left: 10px;">Enter 11 digits only</small>
-                </div>
-
-                <div class="input-group">
-                    <label><i class="fas fa-broom"></i> Service</label>
-                    <select id="serviceType" required>
-                        <option value="" disabled selected>– select service –</option>
-                        <option value="Ironing">Ironing</option>
-                        <option value="Washing">Washing</option>
-                        <option value="Ironing and Washing">Ironing and Washing</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-plus-circle"></i> Add order (pending)
-                </button>
-            </form>
-
-            <div class="info-note">
-                <i class="fas fa-info-circle"></i>
-                <span>After adding, update status to <strong>Ready</strong> below – client gets SMS immediately.</span>
-            </div>
-        </div>
-
-        <!-- right: orders dashboard -->
-        <div class="table-panel">
-            <div class="table-header">
-                <h3><i class="fas fa-clipboard-list"></i> Current orders</h3>
-                <span class="badge-pending" id="pendingCount">Pending: 0</span>
-            </div>
-
-            <table id="ordersTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Service</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- dynamic rows will appear here -->
-                    <tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- fixed toast for SMS notification -->
-<div id="telegramToast" class="toast-message">
-    <i class="fab fa-telegram-plane"></i> <span id="toastText">SMS sent</span>
-</div>
-
 <script>
     (function() {
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const GOOGLE_SHEETS_API = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // ← PASTE YOUR URL HERE
+        
         // ---------- STORAGE ----------
         let orders = [];
 
@@ -507,11 +36,6 @@
                 if(m === '"') return '&quot;';
                 return '&#039;';
             });
-        }
-
-        // Generate unique ID
-        function generateId() {
-            return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
         }
 
         // Render orders table
@@ -551,8 +75,91 @@
             pendingSpan.innerText = `Pending: ${pendingCount}`;
         }
 
+        // ============================================
+        // GOOGLE SHEETS API FUNCTIONS
+        // ============================================
+
+        // Load all orders from Google Sheets
+        async function loadOrdersFromDatabase() {
+            showTelegramNotify('📤 Loading orders...');
+            
+            try {
+                const response = await fetch(GOOGLE_SHEETS_API);
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.orders) {
+                    orders = data.orders.map(row => ({
+                        id: row.id,
+                        name: row.name,
+                        phone: row.phone,
+                        service: row.service,
+                        status: row.status
+                    }));
+                    renderOrders();
+                    showTelegramNotify(`✅ Loaded ${orders.length} orders`);
+                } else {
+                    orders = [];
+                    renderOrders();
+                    showTelegramNotify('📭 No orders found');
+                }
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+                showTelegramNotify('❌ Failed to load orders');
+                orders = [];
+                renderOrders();
+            }
+        }
+
+        // Save new order to Google Sheets
+        async function saveOrderToDatabase(order) {
+            const response = await fetch(GOOGLE_SHEETS_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: order.name,
+                    phone: order.phone,
+                    service: order.service,
+                    status: order.status,
+                    amount: order.amount || 0
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to save order');
+            }
+            
+            return data;
+        }
+
+        // Update order status in Google Sheets
+        async function updateOrderStatusInDatabase(orderId, newStatus) {
+            const response = await fetch(GOOGLE_SHEETS_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update',
+                    orderId: orderId,
+                    status: newStatus
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to update order');
+            }
+            
+            return data;
+        }
+
+        // ============================================
+        // UI ACTION HANDLERS
+        // ============================================
+
         // ---------- ADD ORDER ----------
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const name = nameInp.value.trim();
@@ -564,113 +171,115 @@
                 return;
             }
 
-            const newOrder = {
-                id: generateId(),
-                name: name,
-                phone: phone,
-                service: service,
-                status: 'Pending'
-            };
+            // Show loading
+            showTelegramNotify('📤 Saving order...');
 
-            orders.push(newOrder);
-            renderOrders();
+            try {
+                // Save to Google Sheets first
+                const result = await saveOrderToDatabase({
+                    name: name,
+                    phone: phone,
+                    service: service,
+                    status: 'Pending'
+                });
 
-            // Reset form
-            nameInp.value = '';
-            phoneInp.value = '';
-            serviceInp.value = '';
+                // Add to local array with the ID from Google Sheets
+                orders.push({
+                    id: result.orderId,
+                    name: name,
+                    phone: phone,
+                    service: service,
+                    status: 'Pending'
+                });
 
-            showTelegramNotify(`📥 Order added for ${name}`);
+                renderOrders();
+
+                // Reset form
+                nameInp.value = '';
+                phoneInp.value = '';
+                serviceInp.value = '';
+
+                showTelegramNotify(`✅ Order added for ${name}`);
+                
+            } catch (error) {
+                console.error('Error saving order:', error);
+                showTelegramNotify(`❌ Failed to save order: ${error.message}`);
+            }
         });
 
         // ---------- UPDATE STATUS (AND SEND SMS WHEN READY) ----------
-        window.updateStatus = function(orderId, newStatus) {
+        window.updateStatus = async function(orderId, newStatus) {
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
 
             const oldStatus = order.status;
+
+            // Update locally immediately (optimistic update)
             order.status = newStatus;
             renderOrders();
+            showTelegramNotify(`📤 Updating status...`);
 
-            // If status changed to "Ready", send SMS
-            if (newStatus === 'Ready' && oldStatus !== 'Ready') {
-                const customerName = order.name;
-                const phone = order.phone;
-                const service = order.service;
-
-                // Show sending notification
-                showTelegramNotify(`📤 Sending SMS to ${phone}...`);
-
-                // Use CORS proxy to avoid CORS issues
-                const CORS_PROXY = 'https://corsproxy.io/?';
-                const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
-
-                fetch(CORS_PROXY + N8N_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        customerName: customerName,
-                        phone: phone,
-                        service: service
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                    showTelegramNotify(`✅ SMS sent to ${phone}`);
-                })
-                .catch(error => {
-                    console.error('Error sending SMS:', error);
-                    showTelegramNotify(`❌ SMS failed: ${error.message}`);
-                });
-            } 
-            else if (newStatus === 'Pending' && oldStatus !== 'Pending') {
-                showTelegramNotify(`⚠️ Order set back to pending`);
-            } 
-            else {
-                showTelegramNotify(`Status updated to ${newStatus}`);
+            try {
+                // Update in Google Sheets
+                await updateOrderStatusInDatabase(orderId, newStatus);
+                
+                // If status changed to "Ready", send SMS
+                if (newStatus === 'Ready' && oldStatus !== 'Ready') {
+                    await sendSMSNotification(order);
+                } else {
+                    showTelegramNotify(`✅ Status updated to ${newStatus}`);
+                }
+                
+            } catch (error) {
+                // Revert on error
+                order.status = oldStatus;
+                renderOrders();
+                console.error('Error updating status:', error);
+                showTelegramNotify(`❌ Update failed: ${error.message}`);
             }
         };
 
+        // ---------- SEND SMS NOTIFICATION ----------
+        async function sendSMSNotification(order) {
+            const customerName = order.name;
+            const phone = order.phone;
+            const service = order.service;
+
+            // Your existing SMS sending code (using n8n)
+            const CORS_PROXY = 'https://corsproxy.io/?';
+            const N8N_URL = encodeURIComponent('https://praisephs2000.app.n8n.cloud/webhook/laundry-sms');
+
+            try {
+                const response = await fetch(CORS_PROXY + N8N_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customerName, phone, service })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('SMS sent:', data);
+                showTelegramNotify(`✅ SMS sent to ${phone}`);
+                
+            } catch (error) {
+                console.error('Error sending SMS:', error);
+                showTelegramNotify(`❌ SMS failed: ${error.message}`);
+            }
+        }
+
         // ---------- DELETE ORDER ----------
         window.deleteOrder = function(orderId) {
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex === -1) return;
-
-            const deleted = orders[orderIndex];
-            orders.splice(orderIndex, 1);
-            renderOrders();
-            showTelegramNotify(`🗑️ Order for ${deleted.name} removed`);
+            // Note: Delete functionality requires additional Google Sheets API endpoint
+            // For now, just show message
+            showTelegramNotify('❌ Delete requires database sync');
         };
 
-        // ---------- Initialize with sample orders ----------
-        (function addExamples() {
-            orders.push({
-                id: generateId(),
-                name: 'Margaret Akinyi',
-                phone: '0722123456',
-                service: 'Ironing and Washing',
-                status: 'Pending'
-            });
-            orders.push({
-                id: generateId(),
-                name: 'James Kariuki',
-                phone: '0733987654',
-                service: 'Washing',
-                status: 'Ready'
-            });
-            renderOrders();
-        })();
+        // ---------- INITIALIZE ----------
+        // Load orders from Google Sheets when page starts
+        loadOrdersFromDatabase();
 
     })();
 </script>
-
-</body>
-</html>
