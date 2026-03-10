@@ -25,7 +25,7 @@ function updateDebug(message) {
 }
 
 /* -----------------------------
-LOAD ORDERS
+LOAD ORDERS - FIXED FOR EMPTY RESPONSES
 ----------------------------- */
 async function loadOrders() {
     updateDebug("Loading orders...");
@@ -42,10 +42,27 @@ async function loadOrders() {
             throw new Error("HTTP error " + response.status);
         }
 
-        const data = await response.json();
-        lastResponse = data;
-        console.log("Response:", data);
-        displayOrders(data);
+        // Check if response has content before parsing
+        const responseText = await response.text();
+        
+        if (!responseText || responseText.trim() === "") {
+            updateDebug("⚠️ Empty response received from webhook");
+            // Show empty table with message
+            displayOrders([]);
+            return;
+        }
+
+        // Try to parse as JSON
+        try {
+            const data = JSON.parse(responseText);
+            lastResponse = data;
+            console.log("Response:", data);
+            displayOrders(data);
+        } catch (parseError) {
+            updateDebug("❌ Invalid JSON: " + responseText.substring(0, 50));
+            console.error("Parse error:", parseError);
+            displayOrders([]);
+        }
 
     } catch (error) {
         console.error(error);
@@ -113,7 +130,7 @@ function displayOrders(data) {
                     Complete
                 </button>`;
         } else {
-            actionBtn = "✓ Done";
+            actionBtn = "<span class='text-gray-500'>✓ Done</span>";
         }
 
         html += `
@@ -138,7 +155,7 @@ function displayOrders(data) {
 }
 
 /* -----------------------------
-ADD ORDER
+ADD ORDER - FIXED
 ----------------------------- */
 async function addOrder() {
     const customerName = document.getElementById("customerName").value.trim();
@@ -167,20 +184,33 @@ async function addOrder() {
             })
         });
 
-        const data = await response.json();
-        lastResponse = data;
+        // Check if response has content
+        const responseText = await response.text();
+        
+        if (responseText && responseText.trim() !== "") {
+            try {
+                const data = JSON.parse(responseText);
+                lastResponse = data;
+                console.log("Create response:", data);
+            } catch (e) {
+                console.log("Non-JSON response:", responseText);
+            }
+        } else {
+            console.log("Empty response from create");
+        }
+        
         alert("Order created");
         clearForm();
         loadOrders();
 
     } catch (error) {
         updateDebug("ERROR creating order: " + error.message);
-        alert("Failed to create order");
+        alert("Failed to create order: " + error.message);
     }
 }
 
 /* -----------------------------
-UPDATE STATUS
+UPDATE STATUS - FIXED
 ----------------------------- */
 async function updateStatus(orderId, status, name, phone) {
     if (!confirm("Change order status to " + status + "?")) return;
@@ -202,13 +232,25 @@ async function updateStatus(orderId, status, name, phone) {
             body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
-        lastResponse = data;
+        // Check if response has content
+        const responseText = await response.text();
+        
+        if (responseText && responseText.trim() !== "") {
+            try {
+                const data = JSON.parse(responseText);
+                lastResponse = data;
+                console.log("Update response:", data);
+            } catch (e) {
+                console.log("Non-JSON update response:", responseText);
+            }
+        }
+        
         alert("Order updated");
         loadOrders();
 
     } catch (error) {
         updateDebug("ERROR updating order: " + error.message);
+        alert("Failed to update order: " + error.message);
     }
 }
 
