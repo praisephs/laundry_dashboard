@@ -94,8 +94,15 @@
 /* -----------------------------
 YOUR N8N WEBHOOK URL
 ----------------------------- */
-const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
+//const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
 //const API_TEST_URL = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
+
+/* -----------------------------
+YOUR N8N WEBHOOK URL with CORS Proxy
+----------------------------- */
+const CORS_PROXY = "https://corsproxy.io/?";
+const API_URL = CORS_PROXY + encodeURIComponent("https://praisephs2000.app.n8n.cloud/webhook/laundry-api");
+//const API_TEST_URL = CORS_PROXY + encodeURIComponent("https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api");    
 
 let lastResponse = null; // Store last response for debugging
 
