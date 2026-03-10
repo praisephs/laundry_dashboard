@@ -1,556 +1,211 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Touch Laundry · Staff Dashboard</title>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "laundry-sms",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
         }
-
-        body {
-            background: #f4f7fb;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1.5rem;
-        }
-
-        .dashboard {
-            max-width: 1300px;
-            width: 100%;
-        }
-
-        .brand-header {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.08);
-            padding: 1.8rem 2.5rem;
-            margin-bottom: 2.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
-        .brand-title img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #e1ecf5;
-            padding: 5px;
-        }
-
-        .brand-title h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: #0b4f6c;
-        }
-
-        .telegram-badge {
-            background: #eef5fa;
-            border-radius: 60px;
-            padding: 0.7rem 1.5rem;
-            color: #1c6c8c;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .grid-panel {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 2rem;
-        }
-
-        .form-card, .table-panel {
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 20px 35px -8px rgba(18, 52, 77, 0.12);
-            padding: 2rem 1.8rem;
-        }
-
-        .form-card h2 {
-            font-size: 1.5rem;
-            color: #113946;
-            margin-bottom: 0.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .subh {
-            font-size: 0.9rem;
-            color: #5b7e94;
-            margin-bottom: 2rem;
-            border-left: 4px solid #2e7a98;
-            padding-left: 1rem;
-            background: #f0f7fc;
-            border-radius: 0 12px 12px 0;
-        }
-
-        .input-group {
-            margin-bottom: 1.7rem;
-        }
-
-        .input-group label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: #1f4b63;
-            margin-bottom: 8px;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 14px 18px;
-            background: #f2f9ff;
-            border: 2px solid #dae9f2;
-            border-radius: 24px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .btn-primary {
-            background: #145873;
-            border: none;
-            padding: 16px 22px;
-            border-radius: 40px;
-            width: 100%;
-            font-weight: 600;
-            font-size: 1.2rem;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-
-        .info-note {
-            margin-top: 20px;
-            background: #eaf3fa;
-            border-radius: 20px;
-            padding: 1rem;
-            font-size: 0.9rem;
-            color: #17536d;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .badge-pending {
-            background: #fef7e6;
-            color: #aa7000;
-            font-weight: 600;
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem 0.5rem;
-            color: #366277;
-            font-weight: 600;
-            border-bottom: 2px solid #c2dceb;
-        }
-
-        td {
-            padding: 1rem 0.5rem;
-            border-bottom: 1px solid #daecf5;
-            color: #174c64;
-        }
-
-        .service-badge {
-            background: #dbeefb;
-            padding: 0.3rem 0.9rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #0d4f6e;
-            display: inline-block;
-        }
-
-        .status-select {
-            background: #ecf5fa;
-            border: 2px solid #b9d5e7;
-            border-radius: 30px;
-            padding: 0.4rem 1rem;
-            font-weight: 500;
-            color: #0f445b;
-            cursor: pointer;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: #2780a8;
-            font-size: 1.3rem;
-            cursor: pointer;
-        }
-
-        .empty-row td {
-            padding: 3rem;
-            text-align: center;
-            color: #6f96ac;
-            font-style: italic;
-        }
-
-        .toast-message {
-            visibility: hidden;
-            min-width: 260px;
-            background: #145873;
-            color: #fff;
-            text-align: center;
-            border-radius: 60px;
-            padding: 14px 18px;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .toast-message.show {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard">
-        <!-- Header -->
-        <div class="brand-header">
-            <div class="brand-title">
-                <img src="file.jpg" alt="Divine Touch Laundry Logo">
-                <h1>Divine Touch Laundry</h1>
-            </div>
-            <div class="telegram-badge">
-                <i class="fab fa-telegram-plane"></i>
-                <span>SMS Notifications · Active</span>
-            </div>
-        </div>
-
-        <!-- Main Grid -->
-        <div class="grid-panel">
-            <!-- Left: Order Form -->
-            <div class="form-card">
-                <h2><i class="fas fa-tshirt"></i> New Order</h2>
-                <div class="subh">Drop‑off registration · staff only</div>
-
-                <form id="orderForm">
-                    <div class="input-group">
-                        <label><i class="fas fa-user"></i> Full Name</label>
-                        <input type="text" id="customerName" placeholder="e.g. Sarah Mwangi" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label><i class="fas fa-phone-alt"></i> Phone Number (11 digits)</label>
-                        <input type="tel" id="customerPhone" placeholder="0712345678" 
-                               pattern="[0-9]{11}" maxlength="11" minlength="11"
-                               title="Enter exactly 11 digits"
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label><i class="fas fa-broom"></i> Service</label>
-                        <select id="serviceType" required>
-                            <option value="" disabled selected>– select service –</option>
-                            <option value="Ironing">Ironing</option>
-                            <option value="Washing">Washing</option>
-                            <option value="Ironing and Washing">Ironing and Washing</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-plus-circle"></i> Add Order (Pending)
-                    </button>
-                </form>
-
-                <div class="info-note">
-                    <i class="fas fa-info-circle"></i>
-                    <span>After adding, update status to <strong>Ready</strong> – client gets SMS immediately.</span>
-                </div>
-            </div>
-
-            <!-- Right: Orders Table -->
-            <div class="table-panel">
-                <div class="table-header">
-                    <h3><i class="fas fa-clipboard-list"></i> Current Orders</h3>
-                    <span class="badge-pending" id="pendingCount">Pending: 0</span>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Phone</th>
-                            <th>Service</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="telegramToast" class="toast-message">
-        <i class="fab fa-telegram-plane"></i> <span id="toastText">SMS sent</span>
-    </div>
-
-    <script>
-        // ============================================
-        // CONFIGURATION - UPDATE THESE VALUES
-        // ============================================
-        const N8N_WEBHOOK_URL = 'https://praisephs2000.app.n8n.cloud/webhook/laundry-sms';  // ← YOUR N8N WEBHOOK URL
-        const CORS_PROXY = 'https://corsproxy.io/?';  // Keep if needed, remove if n8n handles CORS
-
-        // ============================================
-        // DOM Elements
-        // ============================================
-        const form = document.getElementById('orderForm');
-        const nameInput = document.getElementById('customerName');
-        const phoneInput = document.getElementById('customerPhone');
-        const serviceInput = document.getElementById('serviceType');
-        const tableBody = document.getElementById('tableBody');
-        const pendingSpan = document.getElementById('pendingCount');
-        const toastEl = document.getElementById('telegramToast');
-        const toastText = document.getElementById('toastText');
-
-        // Local state
-        let orders = [];
-
-        // ============================================
-        // Helper Functions
-        // ============================================
-        function showNotification(msg, isError = false) {
-            toastText.innerText = msg;
-            toastEl.style.background = isError ? '#b00020' : '#145873';
-            toastEl.classList.add('show');
-            setTimeout(() => toastEl.classList.remove('show'), 3200);
-        }
-
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/[&<>"']/g, function(m) {
-                if(m === '&') return '&amp;';
-                if(m === '<') return '&lt;';
-                if(m === '>') return '&gt;';
-                if(m === '"') return '&quot;';
-                return '&#039;';
-            });
-        }
-
-        function renderOrders() {
-            if (!tableBody) return;
-            
-            if (orders.length === 0) {
-                tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">🕊️ No orders yet. Use the form to add.</td></tr>';
-                pendingSpan.innerText = 'Pending: 0';
-                return;
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "value": "={{ $json.body.action }}",
+              "operation": "equal",
+              "toValue": "load"
+            },
+            {
+              "value": "={{ $json.body.action }}",
+              "operation": "equal",
+              "toValue": "create",
+              "output": 1
+            },
+            {
+              "value": "={{ $json.body.action }}",
+              "operation": "equal",
+              "toValue": "update",
+              "output": 2
             }
-
-            let html = '';
-            let pendingCount = 0;
-
-            orders.forEach(order => {
-                if (order.status === 'Pending') pendingCount++;
-
-                const statusClass = order.status === 'Ready' ? 'ready' : '';
-                const serviceBadge = `<span class="service-badge">${escapeHtml(order.service)}</span>`;
-
-                html += `<tr data-id="${escapeHtml(order.id)}">
-                    <td><i class="fas fa-user-circle" style="color:#30758e;"></i> ${escapeHtml(order.name)}</td>
-                    <td>${escapeHtml(order.phone)}</td>
-                    <td>${serviceBadge}</td>
-                    <td>
-                        <select class="status-select ${statusClass}" onchange="window.updateStatus('${escapeHtml(order.id)}', this.value)">
-                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
-                            <option value="Ready" ${order.status === 'Ready' ? 'selected' : ''}>✅ Ready</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="action-btn" onclick="window.deleteOrder('${escapeHtml(order.id)}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>`;
-            });
-
-            tableBody.innerHTML = html;
-            pendingSpan.innerText = `Pending: ${pendingCount}`;
+          ]
         }
-
-        // ============================================
-        // API Calls to n8n Webhook
-        // ============================================
-        async function callN8nWebhook(payload) {
-            const url = CORS_PROXY ? CORS_PROXY + encodeURIComponent(N8N_WEBHOOK_URL) : N8N_WEBHOOK_URL;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
+      },
+      "id": "switch-node",
+      "name": "Action Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [620, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "documentId": {
+          "__rl": true,
+          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
+          "mode": "list",
+          "cachedResultName": "Divine Touch Orders"
+        },
+        "sheetName": "Orders_Real"
+      },
+      "id": "gs-get",
+      "name": "Get Orders",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [840, 140]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
+          "mode": "list"
+        },
+        "sheetName": "Orders_Real",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $now.toFormat('X') }}",
+            "name": "={{ $json.body.customerName }}",
+            "phone": "={{ $json.body.phone }}",
+            "service": "={{ $json.body.service }}",
+            "status": "Pending"
+          }
         }
-
-        async function loadOrders() {
-            try {
-                showNotification('📤 Loading orders...');
-                const data = await callN8nWebhook({ action: 'load' });
-                
-                if (data.orders && Array.isArray(data.orders)) {
-                    orders = data.orders;
-                    renderOrders();
-                    showNotification(`✅ Loaded ${orders.length} orders`);
-                } else {
-                    orders = [];
-                    renderOrders();
-                    showNotification('📭 No orders found');
-                }
-            } catch (error) {
-                console.error('Load error:', error);
-                showNotification('❌ Failed to load orders', true);
+      },
+      "id": "gs-append",
+      "name": "Create Order",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [840, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
+          "mode": "list"
+        },
+        "sheetName": "Orders_Real",
+        "filter": {
+          "conditions": [
+            {
+              "columnName": "id",
+              "value": "={{ $json.body.orderId }}"
             }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.body.status }}"
+          }
         }
-
-        async function saveOrder(orderData) {
-            const data = await callN8nWebhook({
-                action: 'create',
-                customerName: orderData.name,
-                phone: orderData.phone,
-                service: orderData.service,
-                status: 'Pending'
-            });
-            return data;
+      },
+      "id": "gs-update",
+      "name": "Update Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [840, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "Ready"
+            }
+          ]
         }
-
-        async function updateOrderStatus(orderId, newStatus) {
-            const data = await callN8nWebhook({
-                action: 'update',
-                orderId: orderId,
-                status: newStatus
-            });
-            return data;
+      },
+      "id": "if-ready",
+      "name": "Is Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1060, 460]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseBody": "={\n  \"orders\": {{ $node[\"Get Orders\"].json.all() }}\n}"
         }
-
-        // ============================================
-        // Event Handlers
-        // ============================================
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = nameInput.value.trim();
-            const phone = phoneInput.value.trim();
-            const service = serviceInput.value;
-
-            if (!name || !phone || !service) {
-                showNotification('❌ Please fill all fields', true);
-                return;
-            }
-
-            showNotification('📤 Saving order...');
-
-            try {
-                const result = await saveOrder({ name, phone, service });
-                
-                orders.push({
-                    id: result.orderId,
-                    name,
-                    phone,
-                    service,
-                    status: 'Pending'
-                });
-
-                renderOrders();
-                
-                nameInput.value = '';
-                phoneInput.value = '';
-                serviceInput.value = '';
-
-                showNotification(`✅ Order added for ${name}`);
-            } catch (error) {
-                console.error('Save error:', error);
-                showNotification(`❌ Failed: ${error.message}`, true);
-            }
-        });
-
-        // Global functions for inline event handlers
-        window.updateStatus = async (orderId, newStatus) => {
-            const order = orders.find(o => o.id === orderId);
-            if (!order) return;
-
-            const oldStatus = order.status;
-            order.status = newStatus;
-            renderOrders();
-            showNotification('📤 Updating status...');
-
-            try {
-                await updateOrderStatus(orderId, newStatus);
-                
-                if (newStatus === 'Ready' && oldStatus !== 'Ready') {
-                    // Trigger SMS via your existing n8n SMS webhook
-                    showNotification(`✅ SMS would be sent here`);
-                } else {
-                    showNotification(`✅ Status updated to ${newStatus}`);
-                }
-            } catch (error) {
-                order.status = oldStatus;
-                renderOrders();
-                showNotification(`❌ Update failed: ${error.message}`, true);
-            }
-        };
-
-        window.deleteOrder = (orderId) => {
-            showNotification('❌ Delete requires implementation', true);
-        };
-
-        // Initialize
-        loadOrders();
-    </script>
-</body>
-</html>
+      },
+      "id": "respond-load",
+      "name": "Respond Load",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1060, 140]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Action Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action Router": {
+      "main": [
+        [
+          {
+            "node": "Get Orders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Order",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Orders": {
+      "main": [
+        [
+          {
+            "node": "Respond Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status": {
+      "main": [
+        [
+          {
+            "node": "if-ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
