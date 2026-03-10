@@ -237,15 +237,35 @@ clearForm()
 
 loadOrders()
 
-}catch(error){
+catch(error){
 
-updateDebug("ERROR creating order: "+error.message)
+console.error(error)
 
-alert("Failed to create order")
+updateDebug("ERROR: " + error.message)
 
+const table = document.getElementById("orderTableBody");
+
+if(table){
+table.innerHTML = `
+<tr>
+<td colspan="7" class="p-5 text-center text-red-500">
+Failed to load orders
+</td>
+</tr>
+`;
 }
 
-}
+}  
+
+// }catch(error){
+
+// updateDebug("ERROR creating order: "+error.message)
+
+// alert("Failed to create order")
+
+// }
+
+// }
 
 
 
