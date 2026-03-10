@@ -1,130 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divine Touch Laundry Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Divine Touch Laundry Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
 </head>
-<body class="bg-gray-100 p-5">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Divine Touch Laundry Automation</h1>
 
-        <div class="mb-10 bg-blue-50 p-6 rounded-lg">
-            <h2 class="text-xl font-semibold mb-4 text-blue-800">New Order Entry</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded">
-                <input type="text" id="phone" placeholder="Phone (e.g. 08028632878)" class="p-2 border rounded">
-                <select id="service" class="p-2 border rounded">
-                    <option value="Wash & Iron">Wash & Iron</option>
-                    <option value="Dry Clean">Dry Clean</option>
-                    <option value="Ironing Only">Ironing Only</option>
-                </select>
-            </div>
-            <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">Add Order</button>
-        </div>
+<body class="bg-gray-100 p-6">
 
-        <div>
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-200">
-                            <th class="p-3 border">Name</th>
-                            <th class="p-3 border">Service</th>
-                            <th class="p-3 border">Status</th>
-                            <th class="p-3 border">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderTableBody">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-lg">
 
-    <script>
-        // 1. PASTE YOUR N8N PRODUCTION WEBHOOK URL HERE
-        const N8N_WEBHOOK_URL = 'https://praisephs2000.app.n8n.cloud/webhook/laundry-sms';
+<h1 class="text-3xl font-bold text-center text-blue-600 mb-8">
+Divine Touch Laundry System
+</h1>
 
-        // Load Orders on Startup
-        async function loadOrders() {
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'load' })
-                });
-                const data = await response.json();
-                
-                const tableBody = document.getElementById('orderTableBody');
-                tableBody.innerHTML = '';
 
-                if (data.orders && Array.isArray(data.orders)) {
-                    data.orders.forEach(order => {
-                        const row = `
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-3 border">${order.name}</td>
-                                <td class="p-3 border">${order.service}</td>
-                                <td class="p-3 border">
-                                    <span class="px-2 py-1 rounded text-sm ${order.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                                        ${order.status}
-                                    </span>
-                                </td>
-                                <td class="p-3 border">
-                                    ${order.status === 'Pending' ? `<button onclick="markAsReady('${order.id}', '${order.name}', '${order.phone}')" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Mark Ready</button>` : '✅ Notified'}
-                                </td>
-                            </tr>
-                        `;
-                        tableBody.innerHTML += row;
-                    });
-                } else {
-                    tableBody.innerHTML = '<tr><td colspan="4" class="p-5 text-center text-gray-500">No orders found.</td></tr>';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Failed to load orders from n8n');
-            }
-        }
+<!-- ORDER ENTRY -->
 
-        // Add New Order
-        async function addOrder() {
-            const customerName = document.getElementById('customerName').value;
-            const phone = document.getElementById('phone').value;
-            const service = document.getElementById('service').value;
+<div class="mb-10 bg-blue-50 p-6 rounded-lg">
 
-            if(!customerName || !phone) return alert('Please fill in Name and Phone');
+<h2 class="text-xl font-semibold mb-4 text-blue-800">
+New Order Entry
+</h2>
 
-            try {
-                await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'create', customerName, phone, service })
-                });
-                alert('Order added as Pending!');
-                location.reload();
-            } catch (error) {
-                alert('Error adding order');
-            }
-        }
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        // Mark as Ready and Trigger SMS
-        async function markAsReady(orderId, customerName, phone) {
-            try {
-                await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update', orderId, customerName, phone, status: 'Ready' })
-                });
-                alert('Status updated to Ready & SMS Sent!');
-                location.reload();
-            } catch (error) {
-                alert('Error updating status');
-            }
-        }
+<input
+type="text"
+id="customerName"
+placeholder="Customer Name"
+class="p-2 border rounded"
+>
 
-        // Run load on page start
-        window.onload = loadOrders;
-    </script>
+<input
+type="text"
+id="phone"
+placeholder="Phone Number"
+class="p-2 border rounded"
+>
+
+<select id="service" class="p-2 border rounded">
+
+<option value="Wash & Iron">Wash & Iron</option>
+
+<option value="Dry Clean">Dry Clean</option>
+
+<option value="Ironing Only">Ironing Only</option>
+
+</select>
+
+<input
+type="number"
+id="clothesCount"
+placeholder="Clothes Count"
+class="p-2 border rounded"
+>
+
+<input
+type="number"
+id="amount"
+placeholder="Amount (₦)"
+class="p-2 border rounded"
+>
+
+</div>
+
+
+<button
+onclick="addOrder()"
+class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700"
+>
+
+Add Order
+
+</button>
+
+</div>
+
+
+<!-- ORDER TABLE -->
+
+<div>
+
+<h2 class="text-xl font-semibold mb-4 text-gray-800">
+
+Current Orders
+
+</h2>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left border-collapse">
+
+<thead>
+
+<tr class="bg-gray-200">
+
+<th class="p-3 border">Order ID</th>
+
+<th class="p-3 border">Name</th>
+
+<th class="p-3 border">Service</th>
+
+<th class="p-3 border">Clothes</th>
+
+<th class="p-3 border">Amount</th>
+
+<th class="p-3 border">Status</th>
+
+<th class="p-3 border">Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="orderTableBody">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* -----------------------------
+YOUR N8N WEBHOOK URL
+----------------------------- */
+
+const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api"
+
+
+
+/* -----------------------------
+LOAD ORDERS
+----------------------------- */
+
+async function loadOrders(){
+
+try{
+
+const response = await fetch(API_URL,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+action:"load"
+
+})
+
+})
+
+
+const data = await response.json()
+
+const tableBody = document.getElementById("orderTableBody")
+
+tableBody.innerHTML=""
+
+if(data.orders && data.orders.length > 0){
+
+data.orders.forEach(order => {
+
+const row = `
+
+<tr class="hover:bg-gray-50">
+
+<td class="p-3 border">${order.order_id}</td>
+
+<td class="p-3 border">${order.name}</td>
+
+<td class="p-3 border">${order.service}</td>
+
+<td class="p-3 border">${order.clothes_count}</td>
+
+<td class="p-3 border">₦${order.amount}</td>
+
+<td class="p-3 border">
+
+<span class="px-2 py-1 rounded text-sm ${order.status === 'Ready' ? 'bg-green-100 text-green-800' : order.status === 'Completed' ? 'bg-gray-200 text-gray-700' : 'bg-yellow-100 text-yellow-800'}">
+
+${order.status}
+
+</span>
+
+</td>
+
+<td class="p-3 border">
+
+${order.status === "Pending"
+
+? `<button onclick="markReady('${order.order_id}','${order.name}','${order.phone}')"
+
+class="bg-green-500 text-white px-3 py-1 rounded text-sm">
+
+Mark Ready
+
+</button>`
+
+: order.status === "Ready"
+
+? `<button onclick="markCompleted('${order.order_id}')"
+
+class="bg-gray-500 text-white px-3 py-1 rounded text-sm">
+
+Completed
+
+</button>`
+
+: "✓ Done"
+
+}
+
+</td>
+
+</tr>
+
+`
+
+tableBody.innerHTML += row
+
+})
+
+}else{
+
+tableBody.innerHTML =
+
+'<tr><td colspan="7" class="p-5 text-center text-gray-500">No orders found</td></tr>'
+
+}
+
+}catch(error){
+
+console.error(error)
+
+alert("Failed to load orders from n8n")
+
+}
+
+}
+
+
+
+/* -----------------------------
+ADD ORDER
+----------------------------- */
+
+async function addOrder(){
+
+const customerName = document.getElementById("customerName").value
+
+const phone = document.getElementById("phone").value
+
+const service = document.getElementById("service").value
+
+const clothesCount = document.getElementById("clothesCount").value
+
+const amount = document.getElementById("amount").value
+
+
+if(!customerName || !phone){
+
+alert("Please enter customer name and phone")
+
+return
+
+}
+
+
+await fetch(API_URL,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+action:"create",
+
+customerName,
+
+phone,
+
+service,
+
+clothesCount,
+
+amount
+
+})
+
+})
+
+
+alert("Order created")
+
+location.reload()
+
+}
+
+
+
+/* -----------------------------
+MARK READY
+----------------------------- */
+
+async function markReady(orderId,name,phone){
+
+await fetch(API_URL,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+action:"update",
+
+order_id:orderId,
+
+status:"Ready",
+
+name,
+
+phone
+
+})
+
+})
+
+
+alert("Customer notified via SMS")
+
+location.reload()
+
+}
+
+
+
+/* -----------------------------
+MARK COMPLETED
+----------------------------- */
+
+async function markCompleted(orderId){
+
+await fetch(API_URL,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+action:"update",
+
+order_id:orderId,
+
+status:"Completed"
+
+})
+
+})
+
+
+alert("Order completed")
+
+location.reload()
+
+}
+
+
+
+/* -----------------------------
+LOAD ON PAGE START
+----------------------------- */
+
+window.onload = loadOrders
+
+
+</script>
+
 </body>
+
 </html>
