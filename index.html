@@ -235,27 +235,52 @@ alert("Order created")
 
 clearForm()
 
-loadOrders()
+/* -----------------------------
+LOAD ORDERS - CORRECTED VERSION
+----------------------------- */
+async function loadOrders() {
+    try {  // <-- THIS WAS MISSING!
+        updateDebug("Loading orders from " + API_URL + "...");
+        
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "load" })
+        });
 
-catch(error){
-
-console.error(error)
-
-updateDebug("ERROR: " + error.message)
-
-const table = document.getElementById("orderTableBody");
-
-if(table){
-table.innerHTML = `
-<tr>
-<td colspan="7" class="p-5 text-center text-red-500">
-Failed to load orders
-</td>
-</tr>
-`;
+        // First get the response as text to check what it is
+        const responseText = await response.text();
+        updateDebug("Response status: " + response.status);
+        updateDebug("Response preview: " + responseText.substring(0, 100));
+        
+        // Try to parse as JSON
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch(e) {
+            updateDebug("❌ Response is not JSON - it's HTML");
+            throw new Error("Received HTML instead of JSON. Webhook may not be active.");
+        }
+        
+        console.log("Full response:", data);
+        displayOrders(data);
+        
+    } catch(error) {  // <-- CATCH MATCHES WITH THE TRY ABOVE
+        console.error("Error loading orders:", error);
+        updateDebug("ERROR: " + error.message);
+        
+        const tableBody = document.getElementById("orderTableBody");
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="p-5 text-center text-red-500">
+                        Failed to load orders: ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
 }
-
-}  
 
 // }catch(error){
 
