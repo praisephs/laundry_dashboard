@@ -1,211 +1,130 @@
-{
-  "nodes": [
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "laundry-sms",
-        "responseMode": "responseNode",
-        "options": {
-          "allowedOrigins": "*"
-        }
-      },
-      "id": "webhook-node",
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [400, 300]
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "value": "={{ $json.body.action }}",
-              "operation": "equal",
-              "toValue": "load"
-            },
-            {
-              "value": "={{ $json.body.action }}",
-              "operation": "equal",
-              "toValue": "create",
-              "output": 1
-            },
-            {
-              "value": "={{ $json.body.action }}",
-              "operation": "equal",
-              "toValue": "update",
-              "output": 2
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Touch Laundry Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-5">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Divine Touch Laundry Automation</h1>
+
+        <div class="mb-10 bg-blue-50 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4 text-blue-800">New Order Entry</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded">
+                <input type="text" id="phone" placeholder="Phone (e.g. 08028632878)" class="p-2 border rounded">
+                <select id="service" class="p-2 border rounded">
+                    <option value="Wash & Iron">Wash & Iron</option>
+                    <option value="Dry Clean">Dry Clean</option>
+                    <option value="Ironing Only">Ironing Only</option>
+                </select>
+            </div>
+            <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">Add Order</button>
+        </div>
+
+        <div>
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-3 border">Name</th>
+                            <th class="p-3 border">Service</th>
+                            <th class="p-3 border">Status</th>
+                            <th class="p-3 border">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. PASTE YOUR N8N PRODUCTION WEBHOOK URL HERE
+        const N8N_WEBHOOK_URL = 'https://praisephs2000.app.n8n.cloud/webhook/laundry-sms';
+
+        // Load Orders on Startup
+        async function loadOrders() {
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'load' })
+                });
+                const data = await response.json();
+                
+                const tableBody = document.getElementById('orderTableBody');
+                tableBody.innerHTML = '';
+
+                if (data.orders && Array.isArray(data.orders)) {
+                    data.orders.forEach(order => {
+                        const row = `
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 border">${order.name}</td>
+                                <td class="p-3 border">${order.service}</td>
+                                <td class="p-3 border">
+                                    <span class="px-2 py-1 rounded text-sm ${order.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                        ${order.status}
+                                    </span>
+                                </td>
+                                <td class="p-3 border">
+                                    ${order.status === 'Pending' ? `<button onclick="markAsReady('${order.id}', '${order.name}', '${order.phone}')" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Mark Ready</button>` : '✅ Notified'}
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="p-5 text-center text-gray-500">No orders found.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Failed to load orders from n8n');
             }
-          ]
         }
-      },
-      "id": "switch-node",
-      "name": "Action Router",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 1,
-      "position": [620, 300]
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "documentId": {
-          "__rl": true,
-          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
-          "mode": "list",
-          "cachedResultName": "Divine Touch Orders"
-        },
-        "sheetName": "Orders_Real"
-      },
-      "id": "gs-get",
-      "name": "Get Orders",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
-      "position": [840, 140]
-    },
-    {
-      "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
-          "mode": "list"
-        },
-        "sheetName": "Orders_Real",
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "id": "={{ $now.toFormat('X') }}",
-            "name": "={{ $json.body.customerName }}",
-            "phone": "={{ $json.body.phone }}",
-            "service": "={{ $json.body.service }}",
-            "status": "Pending"
-          }
-        }
-      },
-      "id": "gs-append",
-      "name": "Create Order",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
-      "position": [840, 300]
-    },
-    {
-      "parameters": {
-        "operation": "update",
-        "documentId": {
-          "__rl": true,
-          "value": "1EJrW5vrYrTM4P5Ou28cPBpiQ2SXdV3YnqaSx3Ia8Ftk",
-          "mode": "list"
-        },
-        "sheetName": "Orders_Real",
-        "filter": {
-          "conditions": [
-            {
-              "columnName": "id",
-              "value": "={{ $json.body.orderId }}"
+
+        // Add New Order
+        async function addOrder() {
+            const customerName = document.getElementById('customerName').value;
+            const phone = document.getElementById('phone').value;
+            const service = document.getElementById('service').value;
+
+            if(!customerName || !phone) return alert('Please fill in Name and Phone');
+
+            try {
+                await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create', customerName, phone, service })
+                });
+                alert('Order added as Pending!');
+                location.reload();
+            } catch (error) {
+                alert('Error adding order');
             }
-          ]
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "status": "={{ $json.body.status }}"
-          }
         }
-      },
-      "id": "gs-update",
-      "name": "Update Status",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
-      "position": [840, 460]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.status }}",
-              "value2": "Ready"
+
+        // Mark as Ready and Trigger SMS
+        async function markAsReady(orderId, customerName, phone) {
+            try {
+                await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update', orderId, customerName, phone, status: 'Ready' })
+                });
+                alert('Status updated to Ready & SMS Sent!');
+                location.reload();
+            } catch (error) {
+                alert('Error updating status');
             }
-          ]
         }
-      },
-      "id": "if-ready",
-      "name": "Is Ready?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [1060, 460]
-    },
-    {
-      "parameters": {
-        "options": {
-          "responseBody": "={\n  \"orders\": {{ $node[\"Get Orders\"].json.all() }}\n}"
-        }
-      },
-      "id": "respond-load",
-      "name": "Respond Load",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [1060, 140]
-    }
-  ],
-  "connections": {
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Action Router",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Action Router": {
-      "main": [
-        [
-          {
-            "node": "Get Orders",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create Order",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Update Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Orders": {
-      "main": [
-        [
-          {
-            "node": "Respond Load",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update Status": {
-      "main": [
-        [
-          {
-            "node": "if-ready",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  }
-}
+
+        // Run load on page start
+        window.onload = loadOrders;
+    </script>
+</body>
+</html>
