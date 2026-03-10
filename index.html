@@ -1,3 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divine Touch Laundry Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+
+<h1 class="text-3xl font-bold text-center text-blue-600 mb-8">
+    Divine Touch Laundry System
+</h1>
+
+<!-- ORDER ENTRY FORM -->
+<div class="mb-10 bg-blue-50 p-6 rounded-lg">
+    <h2 class="text-xl font-semibold mb-4 text-blue-800">New Order Entry</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded">
+        <input type="text" id="phone" placeholder="Phone Number" class="p-2 border rounded">
+        <select id="service" class="p-2 border rounded">
+            <option value="Wash & Iron">Wash & Iron</option>
+            <option value="Dry Clean">Dry Clean</option>
+            <option value="Ironing Only">Ironing Only</option>
+        </select>
+        <input type="number" id="clothesCount" placeholder="Clothes Count" class="p-2 border rounded">
+        <input type="number" id="amount" placeholder="Amount (₦)" class="p-2 border rounded">
+    </div>
+
+    <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">
+        Add Order
+    </button>
+</div>
+
+<!-- ORDERS TABLE -->
+<div>
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="p-3 border">Order ID</th>
+                    <th class="p-3 border">Name</th>
+                    <th class="p-3 border">Service</th>
+                    <th class="p-3 border">Clothes</th>
+                    <th class="p-3 border">Amount</th>
+                    <th class="p-3 border">Status</th>
+                    <th class="p-3 border">Action</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                <tr>
+                    <td colspan="7" class="p-5 text-center text-gray-500">
+                        Loading orders...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- DEBUG INFO DIV -->
+<div id="debugInfo" class="mt-4 bg-black text-green-400 p-3 rounded text-sm">
+    System starting...
+</div>
+
+</div>
+
 <script>
 
 /* -----------------------------
@@ -85,7 +158,14 @@ async function loadOrders() {
 DISPLAY ORDERS
 ----------------------------- */
 function displayOrders(data) {
+    // SAFETY CHECK - Make sure table body exists
     const tableBody = document.getElementById("orderTableBody");
+    if (!tableBody) {
+        console.error("Table body element not found!");
+        updateDebug("ERROR: Table body element missing");
+        return;
+    }
+    
     let orders = [];
 
     if (Array.isArray(data)) {
@@ -265,13 +345,14 @@ function clearForm() {
 }
 
 /* -----------------------------
-PAGE START
+PAGE START - Wait for DOM to load
 ----------------------------- */
-window.onload = loadOrders;
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded, initializing...");
+    loadOrders();
+});
 
 </script>
 
-<!-- DEBUG INFO DIV - THIS MUST BE OUTSIDE THE SCRIPT TAG! -->
-<div id="debugInfo" class="mt-4 bg-black text-green-400 p-3 rounded text-sm">
-    System starting...
-</div>
+</body>
+</html>
