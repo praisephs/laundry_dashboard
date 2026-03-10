@@ -1,412 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Divine Touch Laundry Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-100 p-6">
-
-<div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-
-<h1 class="text-3xl font-bold text-center text-blue-600 mb-8">
-    Divine Touch Laundry System
-</h1>
-
-<!-- ORDER ENTRY FORM -->
-<div class="mb-10 bg-blue-50 p-6 rounded-lg">
-    <h2 class="text-xl font-semibold mb-4 text-blue-800">New Order Entry</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded">
-        <input type="text" id="phone" placeholder="Phone Number" class="p-2 border rounded">
-        <select id="service" class="p-2 border rounded">
-            <option value="Wash & Iron">Wash & Iron</option>
-            <option value="Dry Clean">Dry Clean</option>
-            <option value="Ironing Only">Ironing Only</option>
-        </select>
-        <input type="number" id="clothesCount" placeholder="Clothes Count" class="p-2 border rounded">
-        <input type="number" id="amount" placeholder="Amount (₦)" class="p-2 border rounded">
-    </div>
-
-    <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">
-        Add Order
-    </button>
-</div>
-
-<!-- ORDERS TABLE -->
-<div>
-    <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
-    
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="p-3 border">Order ID</th>
-                    <th class="p-3 border">Name</th>
-                    <th class="p-3 border">Service</th>
-                    <th class="p-3 border">Clothes</th>
-                    <th class="p-3 border">Amount</th>
-                    <th class="p-3 border">Status</th>
-                    <th class="p-3 border">Action</th>
-                </tr>
-            </thead>
-            <tbody id="orderTableBody">
-                <tr>
-                    <td colspan="7" class="p-5 text-center text-gray-500" id="tableMessage">
-                        Loading orders...
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- DEBUG INFO PANEL - Shows what's happening -->
-<div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-    <h3 class="font-semibold mb-2 text-yellow-800">🛠️ Debug Panel</h3>
-    
-    <div class="grid grid-cols-2 gap-4 mb-3">
-        <button onclick="testConnection()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Test Webhook Connection
-        </button>
-        <button onclick="loadOrders()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Refresh Orders
-        </button>
-        <button onclick="addTestOrder()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Add Test Order
-        </button>
-        <button onclick="viewLastResponse()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-            View Last Response
-        </button>
-    </div>
-    
-    <div id="debugInfo" class="bg-black text-green-400 p-3 rounded font-mono text-sm overflow-auto max-h-40">
-        Ready to test connection...
-    </div>
-</div>
-
-</div>
-
 <script>
-/* -----------------------------
-YOUR N8N WEBHOOK URL
------------------------------ */
-//const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
-//const API_TEST_URL = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
 
 /* -----------------------------
-YOUR N8N WEBHOOK URL with CORS Proxy
+N8N WEBHOOK URL
 ----------------------------- */
-/* -----------------------------
-YOUR N8N WEBHOOK URL with CORS Proxy
------------------------------ */
-// CORS proxy to bypass browser restrictions
+
+// Main webhook
+const MAIN_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
+
+// Optional CORS proxy (enable only if needed)
+const USE_PROXY = true;
 const CORS_PROXY = "https://corsproxy.io/?";
 
-// Main webhook URL (production)
-const MAIN_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
-const API_URL = CORS_PROXY + encodeURIComponent(MAIN_WEBHOOK);
+const API_URL = USE_PROXY
+  ? CORS_PROXY + encodeURIComponent(MAIN_WEBHOOK)
+  : MAIN_WEBHOOK;
 
-// Test webhook URL (for testing)
-const TEST_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
-const API_TEST_URL = CORS_PROXY + encodeURIComponent(TEST_WEBHOOK);
- 
+let lastResponse = null;
 
-let lastResponse = null; // Store last response for debugging
 
 /* -----------------------------
 LOAD ORDERS
 ----------------------------- */
+
 async function loadOrders() {
-    try {
-        updateDebug("Loading orders from " + API_URL + "...");
-        
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "load" })
-        });
 
-        updateDebug("Response status: " + response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+updateDebug("Loading orders...");
 
-        const data = await response.json();
-        lastResponse = data;
-        
-        updateDebug("Received data: " + JSON.stringify(data, null, 2));
-        console.log("Full response:", data);
-        
-        displayOrders(data);
-        
-    } catch(error) {
-        console.error("Error loading orders:", error);
-        updateDebug("ERROR: " + error.message);
-        
-        document.getElementById("orderTableBody").innerHTML = 
-            '<tr><td colspan="7" class="p-5 text-center text-red-500">Failed to load orders: ' + error.message + '</td></tr>';
-    }
+try {
+
+const response = await fetch(API_URL,{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body: JSON.stringify({action:"load"})
+})
+
+updateDebug("Status: " + response.status)
+
+if(!response.ok){
+throw new Error("HTTP error " + response.status)
 }
+
+const data = await response.json()
+
+lastResponse = data
+
+console.log("Response:",data)
+
+displayOrders(data)
+
+} catch(error){
+
+console.error(error)
+
+updateDebug("ERROR: " + error.message)
+
+document.getElementById("orderTableBody").innerHTML =
+`<tr>
+<td colspan="7" class="p-5 text-center text-red-500">
+Failed to load orders
+</td>
+</tr>`
+
+}
+
+}
+
+
 
 /* -----------------------------
 DISPLAY ORDERS
 ----------------------------- */
-function displayOrders(data) {
-    const tableBody = document.getElementById("orderTableBody");
-    
-    // Try to find orders array in different possible response formats
-    let orders = [];
-    
-    if (data && data.orders && Array.isArray(data.orders)) {
-        orders = data.orders;
-    } else if (data && Array.isArray(data)) {
-        orders = data;
-    } else if (data && data.data && Array.isArray(data.data)) {
-        orders = data.data;
-    } else if (data && typeof data === 'object') {
-        // If it's a single object, wrap it in array
-        if (data.order_id || data.name) {
-            orders = [data];
-        }
-    }
-    
-    updateDebug("Found " + orders.length + " orders to display");
-    
-    if (orders.length > 0) {
-        let tableHTML = '';
-        
-        orders.forEach(order => {
-            const status = order.status || 'Pending';
-            
-            // Status color
-            let statusClass = 'bg-yellow-100 text-yellow-800';
-            if (status === 'Ready') statusClass = 'bg-green-100 text-green-800';
-            if (status === 'Completed') statusClass = 'bg-gray-200 text-gray-700';
-            
-            // Action button based on status
-            let actionButton = '';
-            if (status === 'Pending') {
-                actionButton = `<button onclick="updateStatus('${order.order_id}', 'Ready', '${order.name}', '${order.phone}')" 
-                    class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
-                    Mark Ready
-                </button>`;
-            } else if (status === 'Ready') {
-                actionButton = `<button onclick="updateStatus('${order.order_id}', 'Completed')" 
-                    class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600">
-                    Complete
-                </button>`;
-            } else {
-                actionButton = '<span class="text-gray-500 text-sm">✓ Done</span>';
-            }
-            
-            tableHTML += `
-                <tr class="hover:bg-gray-50">
-                    <td class="p-3 border">${order.order_id || 'N/A'}</td>
-                    <td class="p-3 border">${order.name || 'N/A'}</td>
-                    <td class="p-3 border">${order.service || 'N/A'}</td>
-                    <td class="p-3 border text-center">${order.clothes_count || 0}</td>
-                    <td class="p-3 border">₦${order.amount || 0}</td>
-                    <td class="p-3 border">
-                        <span class="px-2 py-1 rounded text-sm ${statusClass}">
-                            ${status}
-                        </span>
-                    </td>
-                    <td class="p-3 border">
-                        ${actionButton}
-                    </td>
-                </tr>
-            `;
-        });
-        
-        tableBody.innerHTML = tableHTML;
-    } else {
-        tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">No orders found. Click "Refresh Orders" to try again.</td></tr>';
-    }
+
+function displayOrders(data){
+
+const tableBody = document.getElementById("orderTableBody")
+
+let orders = []
+
+if(Array.isArray(data)){
+
+orders = data
+
 }
+
+else if(data && Array.isArray(data.orders)){
+
+orders = data.orders
+
+}
+
+else if(data && Array.isArray(data.data)){
+
+orders = data.data
+
+}
+
+updateDebug("Orders found: " + orders.length)
+
+if(orders.length === 0){
+
+tableBody.innerHTML =
+`<tr>
+<td colspan="7" class="p-5 text-center text-gray-500">
+No orders found
+</td>
+</tr>`
+
+return
+}
+
+let html=""
+
+orders.forEach(order =>{
+
+const status = order.status || "Pending"
+
+let statusColor="bg-yellow-100 text-yellow-800"
+
+if(status==="Ready") statusColor="bg-green-100 text-green-800"
+
+if(status==="Completed") statusColor="bg-gray-200 text-gray-700"
+
+let actionBtn=""
+
+if(status==="Pending"){
+
+actionBtn=`
+<button onclick="updateStatus('${order.order_id}','Ready','${order.name}','${order.phone}')"
+class="bg-green-500 text-white px-3 py-1 rounded text-sm">
+Mark Ready
+</button>
+`
+
+}
+
+else if(status==="Ready"){
+
+actionBtn=`
+<button onclick="updateStatus('${order.order_id}','Completed')"
+class="bg-gray-500 text-white px-3 py-1 rounded text-sm">
+Complete
+</button>
+`
+
+}
+
+else{
+
+actionBtn="✓ Done"
+
+}
+
+html +=`
+
+<tr class="hover:bg-gray-50">
+
+<td class="p-3 border">${order.order_id || ""}</td>
+
+<td class="p-3 border">${order.name || ""}</td>
+
+<td class="p-3 border">${order.service || ""}</td>
+
+<td class="p-3 border text-center">${order.clothes_count || 0}</td>
+
+<td class="p-3 border">₦${order.amount || 0}</td>
+
+<td class="p-3 border">
+<span class="px-2 py-1 rounded text-sm ${statusColor}">
+${status}
+</span>
+</td>
+
+<td class="p-3 border">
+${actionBtn}
+</td>
+
+</tr>
+`
+
+})
+
+tableBody.innerHTML = html
+
+}
+
+
 
 /* -----------------------------
 ADD ORDER
 ----------------------------- */
-async function addOrder() {
-    const customerName = document.getElementById("customerName").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const service = document.getElementById("service").value;
-    const clothesCount = document.getElementById("clothesCount").value.trim();
-    const amount = document.getElementById("amount").value.trim();
 
-    if (!customerName || !phone) {
-        alert("Please enter customer name and phone number");
-        return;
-    }
+async function addOrder(){
 
-    if (!clothesCount || !amount) {
-        alert("Please enter clothes count and amount");
-        return;
-    }
+const customerName=document.getElementById("customerName").value.trim()
+const phone=document.getElementById("phone").value.trim()
+const service=document.getElementById("service").value
+const clothesCount=document.getElementById("clothesCount").value
+const amount=document.getElementById("amount").value
 
-    try {
-        updateDebug("Creating order for " + customerName + "...");
-        
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "create",
-                customerName: customerName,
-                phone: phone,
-                service: service,
-                clothesCount: parseInt(clothesCount),
-                amount: parseFloat(amount)
-            })
-        });
+if(!customerName || !phone){
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+alert("Enter customer name and phone")
 
-        const data = await response.json();
-        updateDebug("Order created: " + JSON.stringify(data));
-        
-        alert("Order created successfully!");
-        
-        // Clear form
-        document.getElementById("customerName").value = "";
-        document.getElementById("phone").value = "";
-        document.getElementById("clothesCount").value = "";
-        document.getElementById("amount").value = "";
-        
-        // Reload orders
-        loadOrders();
-        
-    } catch(error) {
-        console.error("Error creating order:", error);
-        updateDebug("ERROR creating order: " + error.message);
-        alert("Failed to create order. Check debug panel for details.");
-    }
+return
+
 }
 
-/* -----------------------------
-UPDATE ORDER STATUS
------------------------------ */
-async function updateStatus(orderId, newStatus, name, phone) {
-    if (!confirm(`Mark order ${orderId} as ${newStatus}?`)) {
-        return;
-    }
+try{
 
-    try {
-        const payload = {
-            action: "update",
-            order_id: orderId,
-            status: newStatus
-        };
-        
-        // Add name and phone only if they exist (for SMS notification)
-        if (name) payload.name = name;
-        if (phone) payload.phone = phone;
-        
-        updateDebug("Updating order: " + JSON.stringify(payload));
-        
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+updateDebug("Creating order...")
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+const response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+action:"create",
+customerName,
+phone,
+service,
+clothesCount,
+amount
+})
+})
 
-        const data = await response.json();
-        updateDebug("Update response: " + JSON.stringify(data));
-        
-        alert(`Order marked as ${newStatus}!`);
-        loadOrders();
-        
-    } catch(error) {
-        console.error("Error updating order:", error);
-        updateDebug("ERROR updating order: " + error.message);
-        alert("Failed to update order. Check debug panel for details.");
-    }
+const data=await response.json()
+
+lastResponse=data
+
+alert("Order created")
+
+clearForm()
+
+loadOrders()
+
+}catch(error){
+
+updateDebug("ERROR creating order: "+error.message)
+
+alert("Failed to create order")
+
 }
 
-/* -----------------------------
-TEST CONNECTION
------------------------------ */
-async function testConnection() {
-    updateDebug("Testing connection to " + API_URL + "...");
-    
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "load" })
-        });
-        
-        updateDebug("✅ Connection successful!");
-        updateDebug("Status: " + response.status + " " + response.statusText);
-        
-        const data = await response.json();
-        updateDebug("Response data: " + JSON.stringify(data, null, 2));
-        
-        // Also try test endpoint
-        updateDebug("\nTesting test endpoint...");
-        const testResponse = await fetch(API_TEST_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "load" })
-        });
-        
-        updateDebug("Test endpoint status: " + testResponse.status);
-        
-    } catch(error) {
-        updateDebug("❌ Connection failed: " + error.message);
-    }
 }
 
-/* -----------------------------
-ADD TEST ORDER (local only)
------------------------------ */
-function addTestOrder() {
-    document.getElementById("customerName").value = "Test Customer";
-    document.getElementById("phone").value = "08066311553";
-    document.getElementById("service").value = "Wash & Iron";
-    document.getElementById("clothesCount").value = "3";
-    document.getElementById("amount").value = "4500";
-    
-    updateDebug("Test data added to form. Click 'Add Order' to submit.");
-}
+
 
 /* -----------------------------
-VIEW LAST RESPONSE
+UPDATE STATUS
 ----------------------------- */
-function viewLastResponse() {
-    if (lastResponse) {
-        updateDebug(JSON.stringify(lastResponse, null, 2));
-    } else {
-        updateDebug("No response yet. Click 'Refresh Orders' first.");
-    }
+
+async function updateStatus(orderId,status,name,phone){
+
+if(!confirm("Change order status to "+status+" ?")) return
+
+const payload={
+action:"update",
+order_id:orderId,
+status:status
 }
 
-/* -----------------------------
-UPDATE DEBUG PANEL
------------------------------ */
-function updateDebug(message) {
-    const debugEl = document.getElementById("debugInfo");
-    debugEl.innerHTML = message.replace(/\n/g, '<br>');
+if(name) payload.name=name
+if(phone) payload.phone=phone
+
+try{
+
+updateDebug("Updating order...")
+
+const response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+})
+
+const data=await response.json()
+
+lastResponse=data
+
+alert("Order updated")
+
+loadOrders()
+
+}catch(error){
+
+updateDebug("ERROR updating order: "+error.message)
+
 }
 
+}
+
+
+
 /* -----------------------------
-INITIALIZE
+CLEAR FORM
 ----------------------------- */
-document.addEventListener('DOMContentLoaded', function() {
-    loadOrders();
-});
+
+function clearForm(){
+
+document.getElementById("customerName").value=""
+document.getElementById("phone").value=""
+document.getElementById("clothesCount").value=""
+document.getElementById("amount").value=""
+
+}
+
+
+
+/* -----------------------------
+DEBUG PANEL
+----------------------------- */
+
+function updateDebug(msg){
+
+document.getElementById("debugInfo").innerHTML =
+msg.replace(/\n/g,"<br>")
+
+}
+
+
+
+/* -----------------------------
+PAGE START
+----------------------------- */
+
+window.onload = loadOrders
 
 </script>
-</body>
-</html>
