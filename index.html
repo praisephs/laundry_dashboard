@@ -4,10 +4,8 @@
 N8N WEBHOOK URL
 ----------------------------- */
 
-// Main webhook
 const MAIN_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
 
-// Optional CORS proxy (enable only if needed)
 const USE_PROXY = true;
 const CORS_PROXY = "https://corsproxy.io/?";
 
@@ -19,25 +17,44 @@ let lastResponse = null;
 
 
 /* -----------------------------
+DEBUG PANEL SAFE FUNCTION
+----------------------------- */
+
+function updateDebug(message){
+
+const debugEl = document.getElementById("debugInfo");
+
+if(!debugEl){
+console.warn("Debug panel not found:",message);
+return;
+}
+
+debugEl.innerHTML = message.replace(/\n/g,"<br>");
+
+}
+
+
+
+/* -----------------------------
 LOAD ORDERS
 ----------------------------- */
 
-async function loadOrders() {
+async function loadOrders(){
 
 updateDebug("Loading orders...");
 
-try {
+try{
 
 const response = await fetch(API_URL,{
 method:"POST",
-headers:{ "Content-Type":"application/json" },
-body: JSON.stringify({action:"load"})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({action:"load"})
 })
 
-updateDebug("Status: " + response.status)
+updateDebug("Status: "+response.status)
 
 if(!response.ok){
-throw new Error("HTTP error " + response.status)
+throw new Error("HTTP error "+response.status)
 }
 
 const data = await response.json()
@@ -48,11 +65,11 @@ console.log("Response:",data)
 
 displayOrders(data)
 
-} catch(error){
+}catch(error){
 
 console.error(error)
 
-updateDebug("ERROR: " + error.message)
+updateDebug("ERROR: "+error.message)
 
 document.getElementById("orderTableBody").innerHTML =
 `<tr>
@@ -73,33 +90,27 @@ DISPLAY ORDERS
 
 function displayOrders(data){
 
-const tableBody = document.getElementById("orderTableBody")
+const tableBody=document.getElementById("orderTableBody")
 
-let orders = []
+let orders=[]
 
 if(Array.isArray(data)){
-
-orders = data
-
+orders=data
 }
 
 else if(data && Array.isArray(data.orders)){
-
-orders = data.orders
-
+orders=data.orders
 }
 
 else if(data && Array.isArray(data.data)){
-
-orders = data.data
-
+orders=data.data
 }
 
-updateDebug("Orders found: " + orders.length)
+updateDebug("Orders found: "+orders.length)
 
-if(orders.length === 0){
+if(orders.length===0){
 
-tableBody.innerHTML =
+tableBody.innerHTML=
 `<tr>
 <td colspan="7" class="p-5 text-center text-gray-500">
 No orders found
@@ -111,14 +122,13 @@ return
 
 let html=""
 
-orders.forEach(order =>{
+orders.forEach(order=>{
 
-const status = order.status || "Pending"
+const status=order.status || "Pending"
 
 let statusColor="bg-yellow-100 text-yellow-800"
 
 if(status==="Ready") statusColor="bg-green-100 text-green-800"
-
 if(status==="Completed") statusColor="bg-gray-200 text-gray-700"
 
 let actionBtn=""
@@ -129,8 +139,7 @@ actionBtn=`
 <button onclick="updateStatus('${order.order_id}','Ready','${order.name}','${order.phone}')"
 class="bg-green-500 text-white px-3 py-1 rounded text-sm">
 Mark Ready
-</button>
-`
+</button>`
 
 }
 
@@ -140,8 +149,7 @@ actionBtn=`
 <button onclick="updateStatus('${order.order_id}','Completed')"
 class="bg-gray-500 text-white px-3 py-1 rounded text-sm">
 Complete
-</button>
-`
+</button>`
 
 }
 
@@ -152,7 +160,6 @@ actionBtn="✓ Done"
 }
 
 html +=`
-
 <tr class="hover:bg-gray-50">
 
 <td class="p-3 border">${order.order_id || ""}</td>
@@ -175,9 +182,7 @@ ${status}
 ${actionBtn}
 </td>
 
-</tr>
-`
-
+</tr>`
 })
 
 tableBody.innerHTML = html
@@ -201,7 +206,6 @@ const amount=document.getElementById("amount").value
 if(!customerName || !phone){
 
 alert("Enter customer name and phone")
-
 return
 
 }
@@ -300,19 +304,6 @@ document.getElementById("customerName").value=""
 document.getElementById("phone").value=""
 document.getElementById("clothesCount").value=""
 document.getElementById("amount").value=""
-
-}
-
-
-
-/* -----------------------------
-DEBUG PANEL
------------------------------ */
-
-function updateDebug(msg){
-
-document.getElementById("debugInfo").innerHTML =
-msg.replace(/\n/g,"<br>")
 
 }
 
