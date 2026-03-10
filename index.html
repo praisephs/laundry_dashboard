@@ -100,9 +100,20 @@ YOUR N8N WEBHOOK URL
 /* -----------------------------
 YOUR N8N WEBHOOK URL with CORS Proxy
 ----------------------------- */
+/* -----------------------------
+YOUR N8N WEBHOOK URL with CORS Proxy
+----------------------------- */
+// CORS proxy to bypass browser restrictions
 const CORS_PROXY = "https://corsproxy.io/?";
-const API_URL = CORS_PROXY + encodeURIComponent("https://praisephs2000.app.n8n.cloud/webhook/laundry-api");
-const API_TEST_URL = CORS_PROXY + encodeURIComponent("https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api");    
+
+// Main webhook URL (production)
+const MAIN_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
+const API_URL = CORS_PROXY + encodeURIComponent(MAIN_WEBHOOK);
+
+// Test webhook URL (for testing)
+const TEST_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
+const API_TEST_URL = CORS_PROXY + encodeURIComponent(TEST_WEBHOOK);
+ 
 
 let lastResponse = null; // Store last response for debugging
 
