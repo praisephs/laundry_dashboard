@@ -5,17 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Divine Touch Laundry Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<style>
-    /* Additional styles for better visibility */
-    .action-btn {
-        transition: all 0.3s ease;
-    }
-    .status-badge {
-        display: inline-block;
-        min-width: 80px;
-        text-align: center;
-    }
-</style>
 </head>
 
 <body class="bg-gray-100 p-6">
@@ -31,18 +20,18 @@
     <h2 class="text-xl font-semibold mb-4 text-blue-800">New Order Entry</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded focus:ring-2 focus:ring-blue-300">
-        <input type="text" id="phone" placeholder="Phone Number" class="p-2 border rounded focus:ring-2 focus:ring-blue-300">
-        <select id="service" class="p-2 border rounded focus:ring-2 focus:ring-blue-300">
+        <input type="text" id="customerName" placeholder="Customer Name" class="p-2 border rounded">
+        <input type="text" id="phone" placeholder="Phone Number" class="p-2 border rounded">
+        <select id="service" class="p-2 border rounded">
             <option value="Wash & Iron">Wash & Iron</option>
             <option value="Dry Clean">Dry Clean</option>
             <option value="Ironing Only">Ironing Only</option>
         </select>
-        <input type="number" id="clothesCount" placeholder="Clothes Count" class="p-2 border rounded focus:ring-2 focus:ring-blue-300">
-        <input type="number" id="amount" placeholder="Amount (₦)" class="p-2 border rounded focus:ring-2 focus:ring-blue-300">
+        <input type="number" id="clothesCount" placeholder="Clothes Count" class="p-2 border rounded">
+        <input type="number" id="amount" placeholder="Amount (₦)" class="p-2 border rounded">
     </div>
 
-    <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition duration-300">
+    <button onclick="addOrder()" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">
         Add Order
     </button>
 </div>
@@ -51,7 +40,7 @@
 <div>
     <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
     
-    <div class="overflow-x-auto border rounded-lg">
+    <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-200">
@@ -65,9 +54,8 @@
                 </tr>
             </thead>
             <tbody id="orderTableBody">
-                <!-- Orders will be loaded here dynamically -->
-                <tr id="loadingRow">
-                    <td colspan="7" class="p-5 text-center text-gray-500">
+                <tr>
+                    <td colspan="7" class="p-5 text-center text-gray-500" id="tableMessage">
                         Loading orders...
                     </td>
                 </tr>
@@ -76,17 +64,30 @@
     </div>
 </div>
 
+<!-- DEBUG INFO PANEL - Shows what's happening -->
+<div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+    <h3 class="font-semibold mb-2 text-yellow-800">🛠️ Debug Panel</h3>
+    
+    <div class="grid grid-cols-2 gap-4 mb-3">
+        <button onclick="testConnection()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Test Webhook Connection
+        </button>
+        <button onclick="loadOrders()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            Refresh Orders
+        </button>
+        <button onclick="addTestOrder()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Add Test Order
+        </button>
+        <button onclick="viewLastResponse()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+            View Last Response
+        </button>
+    </div>
+    
+    <div id="debugInfo" class="bg-black text-green-400 p-3 rounded font-mono text-sm overflow-auto max-h-40">
+        Ready to test connection...
+    </div>
 </div>
 
-<!-- Test buttons section - Remove in production -->
-<div class="max-w-6xl mx-auto mt-4 p-4 bg-yellow-50 rounded-lg">
-    <h3 class="font-semibold mb-2">Test Controls (Visible for testing)</h3>
-    <button onclick="loadOrders()" class="bg-purple-600 text-white px-4 py-2 rounded mr-2 hover:bg-purple-700">
-        Refresh Orders
-    </button>
-    <button onclick="addTestOrder()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-        Add Test Order
-    </button>
 </div>
 
 <script>
@@ -94,16 +95,16 @@
 YOUR N8N WEBHOOK URL
 ----------------------------- */
 const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
-//const API_URL = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
+const API_TEST_URL = "https://praisephs2000.app.n8n.cloud/webhook-test/laundry-api";
+
+let lastResponse = null; // Store last response for debugging
 
 /* -----------------------------
 LOAD ORDERS
 ----------------------------- */
 async function loadOrders() {
     try {
-        // Show loading state
-        const tableBody = document.getElementById("orderTableBody");
-        tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">Loading orders...</td></tr>';
+        updateDebug("Loading orders from " + API_URL + "...");
         
         const response = await fetch(API_URL, {
             method: "POST",
@@ -111,19 +112,26 @@ async function loadOrders() {
             body: JSON.stringify({ action: "load" })
         });
 
+        updateDebug("Response status: " + response.status);
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("Received data:", data); // Debug log
+        lastResponse = data;
+        
+        updateDebug("Received data: " + JSON.stringify(data, null, 2));
+        console.log("Full response:", data);
         
         displayOrders(data);
         
     } catch(error) {
         console.error("Error loading orders:", error);
+        updateDebug("ERROR: " + error.message);
+        
         document.getElementById("orderTableBody").innerHTML = 
-            '<tr><td colspan="7" class="p-5 text-center text-red-500">Failed to load orders. Check console for details.</td></tr>';
+            '<tr><td colspan="7" class="p-5 text-center text-red-500">Failed to load orders: ' + error.message + '</td></tr>';
     }
 }
 
@@ -132,72 +140,74 @@ DISPLAY ORDERS
 ----------------------------- */
 function displayOrders(data) {
     const tableBody = document.getElementById("orderTableBody");
-    tableBody.innerHTML = "";
-
-    // Handle different response formats
+    
+    // Try to find orders array in different possible response formats
     let orders = [];
-    if (data.orders && Array.isArray(data.orders)) {
+    
+    if (data && data.orders && Array.isArray(data.orders)) {
         orders = data.orders;
-    } else if (Array.isArray(data)) {
+    } else if (data && Array.isArray(data)) {
         orders = data;
-    } else if (data.data && Array.isArray(data.data)) {
+    } else if (data && data.data && Array.isArray(data.data)) {
         orders = data.data;
+    } else if (data && typeof data === 'object') {
+        // If it's a single object, wrap it in array
+        if (data.order_id || data.name) {
+            orders = [data];
+        }
     }
-
+    
+    updateDebug("Found " + orders.length + " orders to display");
+    
     if (orders.length > 0) {
+        let tableHTML = '';
+        
         orders.forEach(order => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50';
-            
-            // Get status with default
             const status = order.status || 'Pending';
             
-            // Determine status badge color
-            let statusColor = '';
-            if (status === 'Ready') {
-                statusColor = 'bg-green-100 text-green-800';
-            } else if (status === 'Completed') {
-                statusColor = 'bg-gray-200 text-gray-700';
-            } else {
-                statusColor = 'bg-yellow-100 text-yellow-800';
-            }
-
-            // Generate action button based on status
+            // Status color
+            let statusClass = 'bg-yellow-100 text-yellow-800';
+            if (status === 'Ready') statusClass = 'bg-green-100 text-green-800';
+            if (status === 'Completed') statusClass = 'bg-gray-200 text-gray-700';
+            
+            // Action button based on status
             let actionButton = '';
             if (status === 'Pending') {
-                actionButton = `<button onclick="markReady('${order.order_id}', '${order.name}', '${order.phone}')" 
-                    class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 action-btn">
+                actionButton = `<button onclick="updateStatus('${order.order_id}', 'Ready', '${order.name}', '${order.phone}')" 
+                    class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
                     Mark Ready
                 </button>`;
             } else if (status === 'Ready') {
-                actionButton = `<button onclick="markCompleted('${order.order_id}')" 
-                    class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 action-btn">
+                actionButton = `<button onclick="updateStatus('${order.order_id}', 'Completed')" 
+                    class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600">
                     Complete
                 </button>`;
             } else {
-                actionButton = '<span class="text-gray-500 text-sm">✓ Completed</span>';
+                actionButton = '<span class="text-gray-500 text-sm">✓ Done</span>';
             }
-
-            row.innerHTML = `
-                <td class="p-3 border font-mono text-sm">${order.order_id || 'N/A'}</td>
-                <td class="p-3 border">${order.name || 'N/A'}</td>
-                <td class="p-3 border">${order.service || 'N/A'}</td>
-                <td class="p-3 border text-center">${order.clothes_count || 0}</td>
-                <td class="p-3 border">₦${parseFloat(order.amount || 0).toLocaleString()}</td>
-                <td class="p-3 border">
-                    <span class="px-2 py-1 rounded text-sm ${statusColor} status-badge">
-                        ${status}
-                    </span>
-                </td>
-                <td class="p-3 border">
-                    ${actionButton}
-                </td>
-            `;
             
-            tableBody.appendChild(row);
+            tableHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 border">${order.order_id || 'N/A'}</td>
+                    <td class="p-3 border">${order.name || 'N/A'}</td>
+                    <td class="p-3 border">${order.service || 'N/A'}</td>
+                    <td class="p-3 border text-center">${order.clothes_count || 0}</td>
+                    <td class="p-3 border">₦${order.amount || 0}</td>
+                    <td class="p-3 border">
+                        <span class="px-2 py-1 rounded text-sm ${statusClass}">
+                            ${status}
+                        </span>
+                    </td>
+                    <td class="p-3 border">
+                        ${actionButton}
+                    </td>
+                </tr>
+            `;
         });
+        
+        tableBody.innerHTML = tableHTML;
     } else {
-        tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">No orders found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">No orders found. Click "Refresh Orders" to try again.</td></tr>';
     }
 }
 
@@ -222,6 +232,8 @@ async function addOrder() {
     }
 
     try {
+        updateDebug("Creating order for " + customerName + "...");
+        
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -239,6 +251,9 @@ async function addOrder() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        const data = await response.json();
+        updateDebug("Order created: " + JSON.stringify(data));
+        
         alert("Order created successfully!");
         
         // Clear form
@@ -252,95 +267,125 @@ async function addOrder() {
         
     } catch(error) {
         console.error("Error creating order:", error);
-        alert("Failed to create order. Please try again.");
+        updateDebug("ERROR creating order: " + error.message);
+        alert("Failed to create order. Check debug panel for details.");
     }
 }
 
 /* -----------------------------
-MARK READY
+UPDATE ORDER STATUS
 ----------------------------- */
-async function markReady(orderId, name, phone) {
-    if (!confirm(`Mark order ${orderId} as Ready? Customer will be notified via SMS.`)) {
+async function updateStatus(orderId, newStatus, name, phone) {
+    if (!confirm(`Mark order ${orderId} as ${newStatus}?`)) {
         return;
     }
 
     try {
+        const payload = {
+            action: "update",
+            order_id: orderId,
+            status: newStatus
+        };
+        
+        // Add name and phone only if they exist (for SMS notification)
+        if (name) payload.name = name;
+        if (phone) payload.phone = phone;
+        
+        updateDebug("Updating order: " + JSON.stringify(payload));
+        
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "update",
-                order_id: orderId,
-                status: "Ready",
-                name: name,
-                phone: phone
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        alert("Order marked as Ready! Customer notified via SMS.");
-        loadOrders(); // Reload to show updated status
+        const data = await response.json();
+        updateDebug("Update response: " + JSON.stringify(data));
+        
+        alert(`Order marked as ${newStatus}!`);
+        loadOrders();
         
     } catch(error) {
         console.error("Error updating order:", error);
-        alert("Failed to update order. Please try again.");
+        updateDebug("ERROR updating order: " + error.message);
+        alert("Failed to update order. Check debug panel for details.");
     }
 }
 
 /* -----------------------------
-MARK COMPLETED
+TEST CONNECTION
 ----------------------------- */
-async function markCompleted(orderId) {
-    if (!confirm(`Mark order ${orderId} as Completed?`)) {
-        return;
-    }
-
+async function testConnection() {
+    updateDebug("Testing connection to " + API_URL + "...");
+    
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "update",
-                order_id: orderId,
-                status: "Completed"
-            })
+            body: JSON.stringify({ action: "load" })
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        alert("Order marked as Completed!");
-        loadOrders(); // Reload to show updated status
+        
+        updateDebug("✅ Connection successful!");
+        updateDebug("Status: " + response.status + " " + response.statusText);
+        
+        const data = await response.json();
+        updateDebug("Response data: " + JSON.stringify(data, null, 2));
+        
+        // Also try test endpoint
+        updateDebug("\nTesting test endpoint...");
+        const testResponse = await fetch(API_TEST_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "load" })
+        });
+        
+        updateDebug("Test endpoint status: " + testResponse.status);
         
     } catch(error) {
-        console.error("Error completing order:", error);
-        alert("Failed to complete order. Please try again.");
+        updateDebug("❌ Connection failed: " + error.message);
     }
 }
 
 /* -----------------------------
-ADD TEST ORDER (for testing)
+ADD TEST ORDER (local only)
 ----------------------------- */
 function addTestOrder() {
-    // Fill form with test data
     document.getElementById("customerName").value = "Test Customer";
     document.getElementById("phone").value = "08066311553";
     document.getElementById("service").value = "Wash & Iron";
     document.getElementById("clothesCount").value = "3";
     document.getElementById("amount").value = "4500";
     
-    alert("Test data added to form. Click 'Add Order' to submit.");
+    updateDebug("Test data added to form. Click 'Add Order' to submit.");
 }
 
 /* -----------------------------
-INITIALIZE ON PAGE LOAD
+VIEW LAST RESPONSE
+----------------------------- */
+function viewLastResponse() {
+    if (lastResponse) {
+        updateDebug(JSON.stringify(lastResponse, null, 2));
+    } else {
+        updateDebug("No response yet. Click 'Refresh Orders' first.");
+    }
+}
+
+/* -----------------------------
+UPDATE DEBUG PANEL
+----------------------------- */
+function updateDebug(message) {
+    const debugEl = document.getElementById("debugInfo");
+    debugEl.innerHTML = message.replace(/\n/g, '<br>');
+}
+
+/* -----------------------------
+INITIALIZE
 ----------------------------- */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Page loaded, loading orders...");
     loadOrders();
 });
 
