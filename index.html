@@ -36,11 +36,30 @@
     </button>
 </div>
 
+//uyi
+        <div class="flex gap-3 mb-4">
+        
+        <button onclick="loadOrders('Pending')" class="bg-yellow-500 text-white px-4 py-2 rounded">
+        Pending
+        </button>
+        
+        <button onclick="loadOrders('Ready')" class="bg-blue-500 text-white px-4 py-2 rounded">
+        Ready
+        </button>
+        
+        <button onclick="loadOrders('Completed')" class="bg-gray-600 text-white px-4 py-2 rounded">
+        Completed
+        </button>
+        
+        </div> 
+    
+
 <!-- ORDERS TABLE -->
 <div>
     <h2 class="text-xl font-semibold mb-4 text-gray-800">Current Orders</h2>
     
     <div class="overflow-x-auto">
+        
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-200">
