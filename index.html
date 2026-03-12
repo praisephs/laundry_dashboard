@@ -119,13 +119,17 @@ function updateDebug(message) {
 /* -----------------------------
 LOAD ORDERS - FIXED FOR EMPTY RESPONSES
 ----------------------------- */
-async function loadOrders() {
+async function loadOrders(status = "Pending") {
     updateDebug("Loading orders...");
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "load" })
+          //  body: JSON.stringify({ action: "load" })
+            body: JSON.stringify({
+            action: "load",
+            status: status
+        })
         });
 
         updateDebug("Status: " + response.status);
@@ -368,7 +372,7 @@ PAGE START - Wait for DOM to load
 ----------------------------- */
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM fully loaded, initializing...");
-    loadOrders();
+    loadOrders("Pending");
 });
 
 </script>
