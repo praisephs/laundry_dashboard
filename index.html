@@ -51,7 +51,31 @@
         </button>
         
         </div> 
-    
+
+    <!-- SEARCH BOX -->
+            <div class="mb-4 flex gap-3">
+        
+        <input 
+        id="searchInput"
+        type="text"
+        placeholder="Search name or phone"
+        class="p-2 border rounded w-full"
+        />
+        
+        <button 
+        onclick="searchOrders()"
+        class="bg-purple-600 text-white px-4 py-2 rounded">
+        Search
+        </button>
+        
+        <button 
+        onclick="loadOrders('Pending')"
+        class="bg-gray-500 text-white px-4 py-2 rounded">
+        Reset
+        </button>
+        
+        </div>
+            
 
 <!-- ORDERS TABLE -->
 <div>
@@ -374,6 +398,34 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM fully loaded, initializing...");
     loadOrders("Pending");
 });
+
+      // SEARCH FUNCTION
+    
+        async function searchOrders(){
+    
+    const searchTerm = document.getElementById("searchInput").value.trim();
+    
+    if(!searchTerm){
+    alert("Enter name or phone");
+    return;
+    }
+    
+    updateDebug("Searching orders...");
+    
+    const response = await fetch(API_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+    action:"search",
+    term: searchTerm
+    })
+    });
+    
+    const data = await response.json();
+    
+    displayOrders(data);
+    
+    }
 
 </script>
 
