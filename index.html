@@ -311,20 +311,24 @@ updateDebug("Orders loaded: "+orders.length);
 
 function updateStats(orders){
 
-let revenue=0;
-let pending=0;
-let ready=0;
-let completed=0;
+let revenue = 0;
+let pending = 0;
+let ready = 0;
+let completed = 0;
+
+const today = new Date().toISOString().split("T")[0];
 
 orders.forEach(order=>{
 
-const amount=Number(order.amount)||0;
+const amount = Number(order.amount)||0;
 
 if(order.status==="Pending") pending++;
 if(order.status==="Ready") ready++;
 if(order.status==="Completed") completed++;
 
-revenue+=amount;
+if(order.order_date && order.order_date.startsWith(today)){
+revenue += amount;
+}
 
 });
 
@@ -334,7 +338,6 @@ document.getElementById("readyCount").innerText=ready;
 document.getElementById("completedCount").innerText=completed;
 
 }
-
 
 
 /* ADD ORDER */
