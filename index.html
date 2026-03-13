@@ -170,11 +170,9 @@ System starting...
 
 <script>
 
-const MAIN_WEBHOOK = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
-const API_URL = MAIN_WEBHOOK;
+const API_URL = "https://praisephs2000.app.n8n.cloud/webhook/laundry-api";
 
 let currentFilter = "Pending";
-
 
 function updateDebug(message){
 document.getElementById("debugInfo").innerHTML = message;
@@ -202,6 +200,8 @@ status:status
 const data = await response.json();
 
 displayOrders(data);
+
+loadStats(); // refresh stats
 
 }
 
@@ -272,7 +272,6 @@ actionBtn="<span class='text-gray-500'>✓ Done</span>";
 }
 
 
-
 html+=`
 
 <tr class="hover:bg-gray-50">
@@ -307,37 +306,67 @@ updateDebug("Orders loaded: "+orders.length);
 
 
 
-/* UPDATE DASHBOARD STATS */
+/* UPDATE STATUS COUNTS (TABLE ONLY) */
 
 function updateStats(orders){
 
-let revenue = 0;
 let pending = 0;
 let ready = 0;
 let completed = 0;
 
-const today = new Date().toISOString().split("T")[0];
-
 orders.forEach(order=>{
-
-const amount = Number(order.amount)||0;
 
 if(order.status==="Pending") pending++;
 if(order.status==="Ready") ready++;
 if(order.status==="Completed") completed++;
 
-if(order.order_date && order.order_date.startsWith(today)){
-revenue += amount;
-}
-
 });
 
-document.getElementById("todayRevenue").innerText="₦"+revenue.toLocaleString();
 document.getElementById("pendingCount").innerText=pending;
 document.getElementById("readyCount").innerText=ready;
 document.getElementById("completedCount").innerText=completed;
 
 }
+
+
+
+/* LOAD REAL STATS FROM N8N */
+
+async function loadStats(){
+
+try{
+
+const response = await fetch(API_URL,{
+method:"POST",
+headers:{ "Content-Type":"application/json"},
+body: JSON.stringify({
+action:"stats"
+})
+});
+
+const stats = await response.json();
+
+document.getElementById("todayRevenue").innerText =
+"₦" + Number(stats.todayRevenue || 0).toLocaleString();
+
+document.getElementById("pendingCount").innerText =
+stats.pending || 0;
+
+document.getElementById("readyCount").innerText =
+stats.ready || 0;
+
+document.getElementById("completedCount").innerText =
+stats.completed || 0;
+
+}
+catch(error){
+
+console.log("Stats error:", error);
+
+}
+
+}
+
 
 
 /* ADD ORDER */
@@ -370,10 +399,9 @@ amount
 
 alert("Order created");
 
-loadOrders("Pending");
-loadStats();  
-
 clearForm();
+
+loadOrders("Pending");
 
 }
 
@@ -400,7 +428,6 @@ phone:phone
 alert("Order updated");
 
 loadOrders(currentFilter);
-loadStats();  
 
 }
 
@@ -446,51 +473,12 @@ document.getElementById("amount").value="";
 }
 
 
-async function loadStats(){
 
-try{
-
-const response = await fetch(API_URL,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
-body: JSON.stringify({
-action:"stats"
-})
-});
-
-const stats = await response.json();
-
-document.getElementById("todayRevenue").innerText =
-"₦" + Number(stats.todayRevenue || 0).toLocaleString();
-
-document.getElementById("pendingCount").innerText =
-stats.pending || 0;
-
-document.getElementById("readyCount").innerText =
-stats.ready || 0;
-
-document.getElementById("completedCount").innerText =
-stats.completed || 0;
-
-}
-catch(error){
-
-console.log("Stats error:", error);
-
-document.getElementById("todayRevenue").innerText="₦0";
-document.getElementById("pendingCount").innerText="0";
-document.getElementById("readyCount").innerText="0";
-document.getElementById("completedCount").innerText="0";
-
-}
-
-}
-
-/* START */
+/* START SYSTEM */
 
 document.addEventListener("DOMContentLoaded",()=>{
-loadOrders("Pending");
 loadStats();
+loadOrders("Pending");
 });
 
 </script>
