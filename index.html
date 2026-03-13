@@ -308,8 +308,6 @@ alert("Enter name or phone");
 return;
 }
 
-currentFilter="search";
-
 updateDebug("Searching...");
 
 const response = await fetch(API_URL,{
@@ -321,11 +319,10 @@ term: searchTerm
 })
 });
 
-const responseText = await response.text();
+const data = await response.json();
 
-console.log("Search response:", responseText);
-
-const data = JSON.parse(responseText);
+// 🔍 THIS WILL SHOW US WHAT THE SERVER SENT
+console.log("SEARCH RESULT:", data);
 
 displayOrders(data);
 
