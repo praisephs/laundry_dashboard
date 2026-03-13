@@ -240,8 +240,8 @@ function displayOrders(data) {
     orders.forEach(order => {
         const status = order.status || "Pending";
         let statusColor = "bg-yellow-100 text-yellow-800";
-        if (status === "Ready") statusColor = "bg-green-100 text-green-800";
-        if (status === "Completed") statusColor = "bg-gray-200 text-gray-700";
+        // if (status === "Ready") statusColor = "bg-green-100 text-green-800";
+        // if (status === "Completed") statusColor = "bg-gray-200 text-gray-700";
 
         let actionBtn = "";
         if (status === "Pending") {
