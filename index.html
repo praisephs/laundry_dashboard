@@ -167,8 +167,9 @@ else if (data && Array.isArray(data.orders)) {
 else if (data && Array.isArray(data.data)) {
     orders = data.data;
 }
-else {
-    console.log("Unexpected response:", data);
+else if (data && typeof data === "object") {
+    // convert single result to array
+    orders = [data];
 }
 
 if(orders.length===0){
