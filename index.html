@@ -371,6 +371,7 @@ amount
 alert("Order created");
 
 loadOrders("Pending");
+loadStats();  
 
 clearForm();
 
@@ -399,6 +400,7 @@ phone:phone
 alert("Order updated");
 
 loadOrders(currentFilter);
+loadStats();  
 
 }
 
@@ -444,11 +446,31 @@ document.getElementById("amount").value="";
 }
 
 
+async function loadStats(){
+
+const response = await fetch(API_URL,{
+method:"POST",
+headers:{ "Content-Type":"application/json"},
+body: JSON.stringify({
+action:"stats"
+})
+});
+
+const stats = await response.json();
+
+document.getElementById("todayRevenue").innerText = "₦"+Number(stats.todayRevenue).toLocaleString();
+document.getElementById("pendingCount").innerText = stats.pending;
+document.getElementById("readyCount").innerText = stats.ready;
+document.getElementById("completedCount").innerText = stats.completed;
+
+}
+  
 
 /* START */
 
 document.addEventListener("DOMContentLoaded",()=>{
 loadOrders("Pending");
+loadStats();
 });
 
 </script>
