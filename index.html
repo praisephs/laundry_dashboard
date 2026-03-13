@@ -448,6 +448,8 @@ document.getElementById("amount").value="";
 
 async function loadStats(){
 
+try{
+
 const response = await fetch(API_URL,{
 method:"POST",
 headers:{ "Content-Type":"application/json"},
@@ -458,13 +460,31 @@ action:"stats"
 
 const stats = await response.json();
 
-document.getElementById("todayRevenue").innerText = "₦"+Number(stats.todayRevenue).toLocaleString();
-document.getElementById("pendingCount").innerText = stats.pending;
-document.getElementById("readyCount").innerText = stats.ready;
-document.getElementById("completedCount").innerText = stats.completed;
+document.getElementById("todayRevenue").innerText =
+"₦" + Number(stats.todayRevenue || 0).toLocaleString();
+
+document.getElementById("pendingCount").innerText =
+stats.pending || 0;
+
+document.getElementById("readyCount").innerText =
+stats.ready || 0;
+
+document.getElementById("completedCount").innerText =
+stats.completed || 0;
 
 }
-  
+catch(error){
+
+console.log("Stats error:", error);
+
+document.getElementById("todayRevenue").innerText="₦0";
+document.getElementById("pendingCount").innerText="0";
+document.getElementById("readyCount").innerText="0";
+document.getElementById("completedCount").innerText="0";
+
+}
+
+}
 
 /* START */
 
