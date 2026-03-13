@@ -158,8 +158,18 @@ const tableBody = document.getElementById("orderTableBody");
 
 let orders = [];
 
-if(Array.isArray(data)) orders = data;
-else if(data.orders) orders = data.orders;
+if (Array.isArray(data)) {
+    orders = data;
+}
+else if (data && Array.isArray(data.orders)) {
+    orders = data.orders;
+}
+else if (data && Array.isArray(data.data)) {
+    orders = data.data;
+}
+else {
+    console.log("Unexpected response:", data);
+}
 
 if(orders.length===0){
 tableBody.innerHTML = `<tr>
@@ -291,7 +301,7 @@ loadOrders(currentFilter);
 
 async function searchOrders(){
 
-const searchTerm=document.getElementById("searchInput").value.trim();
+const searchTerm = document.getElementById("searchInput").value.trim();
 
 if(!searchTerm){
 alert("Enter name or phone");
@@ -302,21 +312,24 @@ currentFilter="search";
 
 updateDebug("Searching...");
 
-const response=await fetch(API_URL,{
+const response = await fetch(API_URL,{
 method:"POST",
 headers:{ "Content-Type":"application/json"},
 body: JSON.stringify({
 action:"search",
-term:searchTerm
+term: searchTerm
 })
 });
 
-const data=await response.json();
+const responseText = await response.text();
+
+console.log("Search response:", responseText);
+
+const data = JSON.parse(responseText);
 
 displayOrders(data);
 
 }
-
 
 /* CLEAR FORM */
 
