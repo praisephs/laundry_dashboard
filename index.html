@@ -344,7 +344,10 @@ action:"stats"
 })
 });
 
-const stats = await response.json();
+const data = await response.json();
+
+// FIX: handle array response from n8n
+const stats = Array.isArray(data) ? data[0] : data;
 
 document.getElementById("todayRevenue").innerText =
 "₦" + Number(stats.todayRevenue || 0).toLocaleString();
