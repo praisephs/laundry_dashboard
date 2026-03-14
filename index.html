@@ -259,7 +259,8 @@ Mark Ready</button>`;
 
 else if(status==="Ready"){
 
-actionBtn=`<button onclick="updateStatus('${order.order_id}','Completed')"
+// FIXED: Added name and phone parameters
+actionBtn=`<button onclick="updateStatus('${order.order_id}','Completed','${order.name}','${order.phone}')"
 class="bg-gray-500 text-white px-3 py-1 rounded text-sm">
 Complete</button>`;
 
@@ -417,7 +418,7 @@ async function updateStatus(orderId,status,name,phone){
 if(!confirm("Change order status to "+status+"?")) return;
 
 
-  console.log("Sending:", {
+console.log("Sending:", {
     order_id: orderId,
     status: status,
     name: name,
