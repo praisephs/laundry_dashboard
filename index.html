@@ -416,6 +416,14 @@ async function updateStatus(orderId,status,name,phone){
 
 if(!confirm("Change order status to "+status+"?")) return;
 
+
+  console.log("Sending:", {
+    order_id: orderId,
+    status: status,
+    name: name,
+    phone: phone
+});
+
 await fetch(API_URL,{
 method:"POST",
 headers:{ "Content-Type":"application/json"},
