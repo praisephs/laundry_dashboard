@@ -449,30 +449,24 @@ loadOrders(currentFilter);
 
 async function searchOrders(){
 
-const searchTerm=document.getElementById("searchInput").value.trim();
+async function searchOrders() {
 
-if(!searchTerm){
-alert("Enter name or phone");
-return;
-}
+const query = document.getElementById("searchInput").value;
 
-updateDebug("Searching...");
-
-const response=await fetch(API_URL,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
+const response = await fetch(WEBHOOK_URL, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
-action:"search",
-term:searchTerm
+action: "search",
+query: query
 })
 });
 
-const data=await response.json();
+const data = await response.json();
 
-displayOrders(data);
+renderOrders(data);
 
 }
-
 
 
 /* CLEAR FORM */
