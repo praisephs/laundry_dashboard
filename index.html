@@ -178,8 +178,6 @@ function updateDebug(message){
 document.getElementById("debugInfo").innerHTML = message;
 }
 
-
-
 /* LOAD ORDERS */
 
 async function loadOrders(status="Pending"){
@@ -190,8 +188,8 @@ updateDebug("Loading orders...");
 
 const response = await fetch(API_URL,{
 method:"POST",
-headers:{ "Content-Type":"application/json"},
-body: JSON.stringify({
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
 action:"load",
 status:status
 })
@@ -201,11 +199,9 @@ const data = await response.json();
 
 displayOrders(data);
 
-loadStats(); // refresh stats
+loadStats();
 
 }
-
-
 
 /* DISPLAY ORDERS */
 
@@ -213,12 +209,11 @@ function displayOrders(data){
 
 const tableBody = document.getElementById("orderTableBody");
 
-let orders=[];
+let orders = [];
 
 if(Array.isArray(data)) orders=data;
 else if(data && Array.isArray(data.orders)) orders=data.orders;
 else if(data && typeof data==="object") orders=[data];
-
 
 if(orders.length===0){
 
@@ -229,11 +224,9 @@ No orders found
 </td>
 </tr>`;
 
-updateStats([]);
 return;
 
 }
-
 
 let html="";
 
@@ -246,23 +239,19 @@ let statusColor="bg-yellow-100 text-yellow-800";
 if(status==="Ready") statusColor="bg-blue-100 text-blue-800";
 if(status==="Completed") statusColor="bg-gray-200 text-gray-700";
 
-
 let actionBtn="";
 
 if(status==="Pending"){
 
 actionBtn=`<button onclick="updateStatus('${order.order_id}','Ready','${order.name}','${order.phone}')"
-class="bg-green-500 text-white px-3 py-1 rounded text-sm">
-Mark Ready</button>`;
+class="bg-green-500 text-white px-3 py-1 rounded text-sm">Mark Ready</button>`;
 
 }
 
 else if(status==="Ready"){
 
-// FIXED: Added name and phone parameters
 actionBtn=`<button onclick="updateStatus('${order.order_id}','Completed','${order.name}','${order.phone}')"
-class="bg-gray-500 text-white px-3 py-1 rounded text-sm">
-Complete</button>`;
+class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Complete</button>`;
 
 }
 
@@ -272,15 +261,18 @@ actionBtn="<span class='text-gray-500'>✓ Done</span>";
 
 }
 
-
 html+=`
 
 <tr class="hover:bg-gray-50">
 
 <td class="p-3 border">${order.order_id}</td>
+
 <td class="p-3 border">${order.name}</td>
+
 <td class="p-3 border">${order.service}</td>
+
 <td class="p-3 border text-center">${order.clothes_count}</td>
+
 <td class="p-3 border">₦${order.amount}</td>
 
 <td class="p-3 border">
@@ -297,41 +289,13 @@ ${status}
 
 });
 
-tableBody.innerHTML=html;
-
-updateStats(orders);
+tableBody.innerHTML = html;
 
 updateDebug("Orders loaded: "+orders.length);
 
 }
 
-
-
-/* UPDATE STATUS COUNTS (TABLE ONLY) */
-
-function updateStats(orders){
-
-let pending = 0;
-let ready = 0;
-let completed = 0;
-
-orders.forEach(order=>{
-
-if(order.status==="Pending") pending++;
-if(order.status==="Ready") ready++;
-if(order.status==="Completed") completed++;
-
-});
-
-document.getElementById("pendingCount").innerText=pending;
-document.getElementById("readyCount").innerText=ready;
-document.getElementById("completedCount").innerText=completed;
-
-}
-
-
-
-/* LOAD REAL STATS FROM N8N */
+/* LOAD STATS */
 
 async function loadStats(){
 
@@ -339,39 +303,34 @@ try{
 
 const response = await fetch(API_URL,{
 method:"POST",
-headers:{ "Content-Type":"application/json"},
-body: JSON.stringify({
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
 action:"stats"
 })
 });
 
 const data = await response.json();
 
-// FIX: handle array response from n8n
-const stats = Array.isArray(data) ? data[0] : data;
+const stats = Array.isArray(data)?data[0]:data;
 
 document.getElementById("todayRevenue").innerText =
-"₦" + Number(stats.todayRevenue || 0).toLocaleString();
+"₦"+Number(stats.todayRevenue || 0).toLocaleString();
 
-document.getElementById("pendingCount").innerText =
-stats.pending || 0;
+document.getElementById("pendingCount").innerText = stats.pending || 0;
 
-document.getElementById("readyCount").innerText =
-stats.ready || 0;
+document.getElementById("readyCount").innerText = stats.ready || 0;
 
-document.getElementById("completedCount").innerText =
-stats.completed || 0;
+document.getElementById("completedCount").innerText = stats.completed || 0;
 
 }
+
 catch(error){
 
-console.log("Stats error:", error);
+console.log("Stats error:",error);
 
 }
 
 }
-
-
 
 /* ADD ORDER */
 
@@ -383,15 +342,17 @@ const service=document.getElementById("service").value;
 const clothesCount=document.getElementById("clothesCount").value;
 const amount=document.getElementById("amount").value;
 
-if(!customerName||!phone){
+if(!customerName || !phone){
+
 alert("Enter name and phone");
 return;
+
 }
 
 await fetch(API_URL,{
 method:"POST",
-headers:{ "Content-Type":"application/json"},
-body: JSON.stringify({
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
 action:"create",
 customerName,
 phone,
@@ -409,26 +370,16 @@ loadOrders("Pending");
 
 }
 
-
-
 /* UPDATE STATUS */
 
 async function updateStatus(orderId,status,name,phone){
 
 if(!confirm("Change order status to "+status+"?")) return;
 
-
-console.log("Sending:", {
-    order_id: orderId,
-    status: status,
-    name: name,
-    phone: phone
-});
-
 await fetch(API_URL,{
 method:"POST",
-headers:{ "Content-Type":"application/json"},
-body: JSON.stringify({
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
 action:"update",
 order_id:orderId,
 status:status,
@@ -443,48 +394,46 @@ loadOrders(currentFilter);
 
 }
 
-
-
 /* SEARCH */
 
 async function searchOrders(){
 
-async function searchOrders() {
+const query=document.getElementById("searchInput").value;
 
-const query = document.getElementById("searchInput").value;
-
-const response = await fetch(WEBHOOK_URL, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-action: "search",
-query: query
+const response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+action:"search",
+query:query
 })
 });
 
-const data = await response.json();
+const data=await response.json();
 
-renderOrders(data);
+displayOrders(data);
 
 }
-
 
 /* CLEAR FORM */
 
 function clearForm(){
+
 document.getElementById("customerName").value="";
 document.getElementById("phone").value="";
 document.getElementById("clothesCount").value="";
 document.getElementById("amount").value="";
+
 }
-
-
 
 /* START SYSTEM */
 
 document.addEventListener("DOMContentLoaded",()=>{
+
 loadStats();
+
 loadOrders("Pending");
+
 });
 
 </script>
