@@ -414,7 +414,7 @@ loadOrders(currentFilter);
             headers: { "Content-Type": "application/json"},
             body: JSON.stringify({
                 action: "search",
-                query: searchTerm  // Changed from 'term' to 'query' to match code node
+                query: searchTerm
             })
         });
         
@@ -425,7 +425,7 @@ loadOrders(currentFilter);
         
         // Get the response text first
         const text = await response.text();
-        console.log("Search response:", text);
+        console.log("🔍 RAW SEARCH RESPONSE:", text);  // ← ADD THIS LINE
         
         if (!text) {
             displayOrders([]);
@@ -435,6 +435,7 @@ loadOrders(currentFilter);
         
         // Try to parse JSON
         const data = JSON.parse(text);
+        console.log("📦 PARSED RESULTS:", data);  // ← ADD THIS LINE
         displayOrders(data);
         
     } catch (error) {
