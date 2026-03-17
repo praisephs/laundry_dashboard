@@ -232,7 +232,9 @@ let html="";
 
 orders.forEach(order=>{
 
-const status = order.status || "Pending";
+const data = order.json ? order.json : order;
+
+const status = data.status || "Pending";
 
 let statusColor="bg-yellow-100 text-yellow-800";
 
@@ -243,14 +245,14 @@ let actionBtn="";
 
 if(status==="Pending"){
 
-actionBtn=`<button onclick="updateStatus('${order.order_id}','Ready','${order.name}','${order.phone}')"
+actionBtn=`<button onclick="updateStatus('${data.order_id}','Ready','${data.name}','${data.phone}')"
 class="bg-green-500 text-white px-3 py-1 rounded text-sm">Mark Ready</button>`;
 
 }
 
 else if(status==="Ready"){
 
-actionBtn=`<button onclick="updateStatus('${order.order_id}','Completed','${order.name}','${order.phone}')"
+actionBtn=`<button onclick="updateStatus('${data.order_id}','Completed','${data.name}','${data.phone}')"
 class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Complete</button>`;
 
 }
@@ -265,15 +267,15 @@ html+=`
 
 <tr class="hover:bg-gray-50">
 
-<td class="p-3 border">${order.order_id}</td>
+<td class="p-3 border">${data.order_id}</td>
 
-<td class="p-3 border">${order.name}</td>
+<td class="p-3 border">${data.name}</td>
 
-<td class="p-3 border">${order.service}</td>
+<td class="p-3 border">${data.service}</td>
 
-<td class="p-3 border text-center">${order.clothes_count}</td>
+<td class="p-3 border text-center">${data.clothes_count}</td>
 
-<td class="p-3 border">₦${order.amount}</td>
+<td class="p-3 border">₦${data.amount}</td>
 
 <td class="p-3 border">
 <span class="px-2 py-1 rounded text-sm ${statusColor}">
