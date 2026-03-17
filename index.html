@@ -398,23 +398,50 @@ loadOrders(currentFilter);
 
 /* SEARCH */
 
-async function searchOrders(){
-
-const query=document.getElementById("searchInput").value;
-
-const response=await fetch(API_URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-action:"search",
-query:query
-})
-});
-
-const data=await response.json();
-
-displayOrders(data);
-
+  async function searchOrders() {
+    const searchTerm = document.getElementById("searchInput").value.trim();
+    
+    if (!searchTerm) {
+        alert("Enter name or phone");
+        return;
+    }
+    
+    updateDebug("Searching...");
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json"},
+            body: JSON.stringify({
+                action: "search",
+                query: searchTerm  // Changed from 'term' to 'query' to match code node
+            })
+        });
+        
+        // Check if response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get the response text first
+        const text = await response.text();
+        console.log("Search response:", text);
+        
+        if (!text) {
+            displayOrders([]);
+            updateDebug("No results found");
+            return;
+        }
+        
+        // Try to parse JSON
+        const data = JSON.parse(text);
+        displayOrders(data);
+        
+    } catch (error) {
+        console.error("Search error:", error);
+        updateDebug("Search error: " + error.message);
+        displayOrders([]);
+    }
 }
 
 /* CLEAR FORM */
