@@ -211,21 +211,20 @@ const tableBody = document.getElementById("orderTableBody");
 
 let orders = [];
 
-if(Array.isArray(data)) orders=data;
-else if(data && Array.isArray(data.orders)) orders=data.orders;
-else if(data && typeof data==="object") orders=[data];
-
-if(orders.length===0){
-
-tableBody.innerHTML=`
-<tr>
-<td colspan="7" class="p-5 text-center text-gray-500">
-No orders found
-</td>
-</tr>`;
-
-return;
-
+// Handle different response formats
+if (Array.isArray(data)) {
+    // Check if it's an array of objects with 'results' property
+    if (data.length > 0 && data[0].results) {
+        orders = data[0].results;
+    } else {
+        orders = data;
+    }
+} else if (data && data.results) {
+    orders = data.results;
+} else if (data && Array.isArray(data.orders)) {
+    orders = data.orders;
+} else if (data && typeof data === "object") {
+    orders = [data];
 }
 
 let html="";
